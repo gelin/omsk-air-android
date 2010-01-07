@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -13,18 +12,18 @@ import android.widget.TextView;
 /**
  *  Main activity of the application.
  */
-public class MainActivity extends Activity 
-        implements SharedPreferences.OnSharedPreferenceChangeListener{
+public class MainActivity extends Activity implements Constants {
 
+    /** Storage for the previous temperature values */
+    PreferencesStorage storage;
+    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-        onSharedPreferenceChanged(preferences, TemperatureGetter.TEMPERATURE);
-        onSharedPreferenceChanged(preferences, TemperatureGetter.LAST_MODIFIED);
-        preferences.registerOnSharedPreferenceChangeListener(this);
+        storage = new PreferencesStorage(getPreferences(MODE_PRIVATE));
+        updateTemperatureViews(storage.get());
     }
 
     /**	Called when the activity becomes active. */
@@ -32,38 +31,32 @@ public class MainActivity extends Activity
     public void onResume() {
         super.onResume();
         TemperatureGetter getter = 
-                new TemperatureGetter(getPreferences(MODE_PRIVATE));
+                new TemperatureGetter(handler, storage.get());
         getter.start();
     }
     
     /**
-     *  Handler which updates view.
+     *  Handles temperature updates.
      */
     final Handler handler = new Handler() {
         public void handleMessage(Message msg) {
-            SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-            if (preferences.contains(TemperatureGetter.TEMPERATURE)) {
-                Float temp = preferences.getFloat(
-                        TemperatureGetter.TEMPERATURE, 0);
-                TextView tempView = (TextView)findViewById(R.id.temp_value);
-                tempView.setText(formatTemperature(temp));
+            if (msg.what != TEMPERATURE_UPDATE) {
+                return;
             }
-            if (preferences.contains(TemperatureGetter.LAST_MODIFIED)) {
-                long lastModified = preferences.getLong(
-                        TemperatureGetter.LAST_MODIFIED, 0);
-                TextView dateView = (TextView)findViewById(R.id.temp_date);
-                dateView.setText(formatDate(lastModified));
-            }
+            Bundle values = msg.getData();
+            updateTemperatureViews(values);
+            storage.put(values);
         }
     };
     
-    /**
-     *  Initiated view update on temperature changes.
-     */
-    public void onSharedPreferenceChanged(
-            SharedPreferences preferences, String key) {
-        //actually updates views
-        handler.sendEmptyMessage(0);
+    void updateTemperatureViews(Bundle values) {
+        float temp = values.getFloat(TEMPERATURE);
+        TextView tempView = (TextView)findViewById(R.id.temp_value);
+        tempView.setText(formatTemperature(temp));
+
+        long lastModified = values.getLong(LAST_MODIFIED);
+        TextView dateView = (TextView)findViewById(R.id.temp_date);
+        dateView.setText(formatDate(lastModified));
     }
     
     String formatDate(long timestamp) {
@@ -72,8 +65,8 @@ public class MainActivity extends Activity
         return format.format(new Date(timestamp));
     }
     
-    String formatTemperature(Float temperature) {
-        if (temperature == null) {
+    String formatTemperature(float temperature) {
+        if (temperature == Float.NaN) {
             return getResources().getString(R.string.no_temp);
         }
         return getResources().getString(R.string.temp_format, temperature);

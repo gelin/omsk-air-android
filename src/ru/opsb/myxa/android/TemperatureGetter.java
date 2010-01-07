@@ -7,21 +7,17 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 /**
  *  The thread which asks the server for the current temperature value
  *  and updates the provided SharedPrererences with returned values.
  */
-public class TemperatureGetter extends Thread {
+public class TemperatureGetter extends Thread implements Constants {
 
-    /** Result bundle key with the temperature value. */
-    public static final String TEMPERATURE = "temperature";
-    /** Result bundle key with the last modified value. */
-    public static final String LAST_MODIFIED = "last_modified";
-    
     /**	URL of the temperature source */
     static final String URL = "http://myxa.opsb.ru/files/weather.js";
     
@@ -33,14 +29,20 @@ public class TemperatureGetter extends Thread {
     /**	Group number with temperature result */
     static final int JS_GROUP = 1;
 
-    /** Preferences which will be updated */
-    SharedPreferences preferences;
+    /** Handler where send a message with new values. */
+    Handler handler;
+    
+    /** Previous values (from the storage) */
+    Bundle prevValues;
 
     /**
-     * 	Constructs temperature getter for specified handler.
+     *  Constructs temperature getter for specified handler.
+     *  @param  handler handler where send updated temperature
+     *  @param  prevValues  previously saved values
      */
-    public TemperatureGetter(SharedPreferences preferences) {
-        this.preferences = preferences;
+    public TemperatureGetter(Handler handler, Bundle prevValues) {
+        this.handler = handler;
+        this.prevValues = prevValues;
     }
 
     /**
@@ -48,31 +50,32 @@ public class TemperatureGetter extends Thread {
      */
     public void run() {
         try {
-            Bundle result = getTemperatureBundle();
-            updatePreferences(result);
-        } catch (IOException e) {
+            Bundle result = getTemperatureBundle(prevValues);
+            sendResult(handler, result);
+        } catch (Exception e) {
             Log.e(this.getClass().getName(), "Failed to get temperature", e);
+            sendError(handler);
         }
     }
 
     /**
-     * 	Asks the temperature by the URL.
-     * 	@throws IOException 
+     *  Asks the temperature by the URL.
+     *  @throws IOException if the temperature cannot be retrieved  
      */
-    Bundle getTemperatureBundle() throws IOException {
+    Bundle getTemperatureBundle(Bundle prevValues) throws IOException {
         Bundle result = new Bundle();
         
         URL url = new URL(URL);
         HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-        connection.setIfModifiedSince(preferences.getLong(LAST_MODIFIED, 0));
+        connection.setIfModifiedSince(prevValues.getLong(LAST_MODIFIED, 0));
         connection.connect();
         
         result.putLong(LAST_MODIFIED, connection.getLastModified());
         
         if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
-            if (preferences.contains(TEMPERATURE)) {
+            if (prevValues.containsKey(TEMPERATURE)) {
                 result.putFloat(TEMPERATURE, 
-                        preferences.getFloat(TEMPERATURE, 0));
+                        prevValues.getFloat(TEMPERATURE, Float.NaN));
             }
             return result;
         }
@@ -96,28 +99,34 @@ public class TemperatureGetter extends Thread {
     /**
      * 	Parses the temperature, encoded in JavaScript code.
      */
-    static Float parseTemperature(String js) {
+    static float parseTemperature(String js) {
         Matcher m = JS_PATTERN.matcher(js);
         if (!m.find()) {
             Log.w(TemperatureGetter.class.getName(), "Failed to parse: " + js);
-            return null;
+            return Float.NaN;
         }
         try {
             return Float.parseFloat(m.group(JS_GROUP));
         } catch (NumberFormatException e) {
             Log.w(TemperatureGetter.class.getName(), "Failed to parse: " + js);
-            return null;
+            return Float.NaN;
         }
     }
     
     /**
-     *  Updates preferences with new values.
+     *  Sends result to the handler.
      */
-    void updatePreferences(Bundle bundle) {
-        SharedPreferences.Editor edit = preferences.edit();
-        edit.putLong(LAST_MODIFIED, bundle.getLong(LAST_MODIFIED));
-        edit.putFloat(TEMPERATURE, bundle.getFloat(TEMPERATURE));
-        edit.commit();
+    static void sendResult(Handler handler, Bundle result) {
+        Message message = handler.obtainMessage(TEMPERATURE_UPDATE);
+        message.setData(result);
+        handler.sendMessage(message);
+    }
+    
+    /**
+     *  Sends error to the handler.
+     */
+    static void sendError(Handler handler) {
+        handler.sendEmptyMessage(ERROR);
     }
 
 }

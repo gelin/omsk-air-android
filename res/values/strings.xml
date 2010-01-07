@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Temperature in Omsk</string>
     <string name="now_in_omsk">Now in Omsk</string>
-    <string name="no_temp">-</string>
+    <string name="no_temp">\?</string>
     <string name="date_format">EEE, MMM d, yyyy hh:mm a</string>
     <string name="temp_format">%+.1f&#x00b0;C</string>
 </resources>
