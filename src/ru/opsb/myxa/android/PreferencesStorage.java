@@ -11,6 +11,9 @@ import android.util.Log;
  *  @author gelin
  */
 public class PreferencesStorage {
+    
+    /** Tag for logging */
+    final String TAG = getClass().getName();
 
     /** Preferences instance to save Bundle */
     SharedPreferences preferences;
@@ -40,7 +43,7 @@ public class PreferencesStorage {
             } else if (value instanceof Float) {
                 edit.putFloat(key, (Float)value);
             } else {
-                Log.w(this.getClass().getName(), "unsupported type: " + value.getClass());
+                Log.w(TAG, "unsupported type: " + value.getClass());
             }
         }
         edit.commit();
@@ -65,7 +68,7 @@ public class PreferencesStorage {
             } else if (value instanceof Float) {
                 result.putFloat(key, (Float)value);
             } else {
-                Log.w(this.getClass().getName(), "unsupported type: " + value.getClass());
+                Log.w(TAG, "unsupported type: " + value.getClass());
             }
         }
         return result;

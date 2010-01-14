@@ -2,6 +2,9 @@ package ru.opsb.myxa.android;
 
 public interface Constants {
     
+    /** Name of the shared preferences used to save temperature values */
+    public static final String PREFERENCES = "temperature";
+    
     /** Bundle key with the temperature value. */
     public static final String TEMPERATURE = "temperature";
     /** Bundle key with the last modified value. */

@@ -18,6 +18,9 @@ import android.util.Log;
  */
 public class TemperatureGetter extends Thread implements Constants {
 
+    /** Tag for logging */
+    final String TAG = getClass().getName();
+    
     /**	URL of the temperature source */
     static final String URL = "http://myxa.opsb.ru/files/weather.js";
     
@@ -53,7 +56,7 @@ public class TemperatureGetter extends Thread implements Constants {
             Bundle result = getTemperatureBundle(prevValues);
             sendResult(handler, result);
         } catch (Exception e) {
-            Log.e(this.getClass().getName(), "Failed to get temperature", e);
+            Log.e(TAG, "Failed to get temperature", e);
             sendError(handler);
         }
     }
@@ -99,16 +102,16 @@ public class TemperatureGetter extends Thread implements Constants {
     /**
      * 	Parses the temperature, encoded in JavaScript code.
      */
-    static float parseTemperature(String js) {
+    float parseTemperature(String js) {
         Matcher m = JS_PATTERN.matcher(js);
         if (!m.find()) {
-            Log.w(TemperatureGetter.class.getName(), "Failed to parse: " + js);
+            Log.w(TAG, "Failed to parse: " + js);
             return Float.NaN;
         }
         try {
             return Float.parseFloat(m.group(JS_GROUP));
         } catch (NumberFormatException e) {
-            Log.w(TemperatureGetter.class.getName(), "Failed to parse: " + js);
+            Log.w(TAG, "Failed to parse: " + js);
             return Float.NaN;
         }
     }
