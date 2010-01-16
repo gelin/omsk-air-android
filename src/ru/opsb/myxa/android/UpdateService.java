@@ -1,5 +1,7 @@
 package ru.opsb.myxa.android;
 
+import java.util.Calendar;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,9 +17,6 @@ public class UpdateService extends Service implements Constants {
     /** Storage for the previous temperature values */
     PreferencesStorage storage;
     
-    /** Thread for update */
-    Thread updateThread;
-    
     /** List of callbacks */
     final RemoteCallbackList<UpdateServiceCallback> callbacks =
             new RemoteCallbackList<UpdateServiceCallback>();
@@ -27,7 +26,6 @@ public class UpdateService extends Service implements Constants {
         super.onCreate();
         storage = new PreferencesStorage(
                 getSharedPreferences(PREFERENCES, MODE_PRIVATE));
-        updateThread = new TemperatureGetter(handler, storage.get());
     }
     
     @Override
@@ -73,6 +71,19 @@ public class UpdateService extends Service implements Constants {
         callbacks.finishBroadcast();
     }
     
+    /**
+     *  Returns true if the temperature values are expired,
+     *  i.e. more that 1 minute come from the last update.
+     */
+    boolean isExpired(Bundle values) {
+        long lastModified = values.getLong(LAST_MODIFIED);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.SECOND, 0);   //this minute with zero seconds
+        calendar.set(Calendar.MILLISECOND, 0);
+        //calendar.add(Calendar.MINUTE, -1);
+        return lastModified < calendar.getTimeInMillis();   //strongly less! 
+    }
+    
     /** This service implementation */
     private final UpdateServiceInterface.Stub binder = 
             new UpdateServiceInterface.Stub() {
@@ -94,12 +105,9 @@ public class UpdateService extends Service implements Constants {
         }
 
         public void startUpdate() throws RemoteException {
-            synchronized (updateThread) {       
-                switch (updateThread.getState()) {  //isAlive() is bad???
-                case NEW:
-                case TERMINATED:
-                    updateThread.start();
-                }
+            Bundle values = storage.get();
+            if (isExpired(values)) {
+                new Thread(new TemperatureGetter(handler, values)).start();
             }
         }
 

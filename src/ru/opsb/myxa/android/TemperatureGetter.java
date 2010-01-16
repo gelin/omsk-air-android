@@ -16,7 +16,7 @@ import android.util.Log;
  *  The thread which asks the server for the current temperature value
  *  and updates the provided SharedPrererences with returned values.
  */
-public class TemperatureGetter extends Thread implements Constants {
+public class TemperatureGetter implements Runnable, Constants {
 
     /**	URL of the temperature source */
     static final String URL = "http://myxa.opsb.ru/files/weather.js";
