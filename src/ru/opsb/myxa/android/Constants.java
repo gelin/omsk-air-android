@@ -2,6 +2,9 @@ package ru.opsb.myxa.android;
 
 public interface Constants {
     
+    /** Tag for logging */
+    final String TAG = "ru.opsb.myxa.android";
+    
     /** Name of the shared preferences used to save temperature values */
     public static final String PREFERENCES = "temperature";
     

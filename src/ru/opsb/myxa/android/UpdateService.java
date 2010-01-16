@@ -12,9 +12,6 @@ import android.util.Log;
 
 public class UpdateService extends Service implements Constants {
 
-    /** Tag for logging */
-    final String TAG = getClass().getName();
-    
     /** Storage for the previous temperature values */
     PreferencesStorage storage;
     
@@ -57,6 +54,23 @@ public class UpdateService extends Service implements Constants {
                 Log.w(TAG, "callback failed", e);
             }
         }
+        callbacks.finishBroadcast();
+    }
+    
+    /**
+     *  Sends error message to callbacks.
+     */
+    void sendError(String error) {
+        final int n = callbacks.beginBroadcast();
+        for (int i = 0; i < n; i++) {
+            try {
+                callbacks.getBroadcastItem(i).onError(error);
+            } catch (RemoteException e) {
+                //nothing to do
+                Log.w(TAG, "callback failed", e);
+            }
+        }
+        callbacks.finishBroadcast();
     }
     
     /** This service implementation */
@@ -80,10 +94,13 @@ public class UpdateService extends Service implements Constants {
         }
 
         public void startUpdate() throws RemoteException {
-            if (updateThread.isAlive()) {
-                return;
+            synchronized (updateThread) {       
+                switch (updateThread.getState()) {  //isAlive() is bad???
+                case NEW:
+                case TERMINATED:
+                    updateThread.start();
+                }
             }
-            updateThread.start();
         }
 
     };
@@ -93,12 +110,16 @@ public class UpdateService extends Service implements Constants {
      */
     final Handler handler = new Handler() {
         public void handleMessage(Message msg) {
-            if (msg.what != TEMPERATURE_UPDATE) {
-                return;
+            switch (msg.what) {
+            case TEMPERATURE_UPDATE:
+                Bundle values = msg.getData();
+                storage.put(values);
+                sendUpdates(values);
+                break;
+            case ERROR:
+                sendError(String.valueOf(msg.obj));
+                break;
             }
-            Bundle values = msg.getData();
-            sendUpdates(values);
-            storage.put(values);
         }
     };
 

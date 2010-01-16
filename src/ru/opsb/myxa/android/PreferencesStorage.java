@@ -10,11 +10,8 @@ import android.util.Log;
  *  Stores and retrieves Bundle to/from the SharedPreferences.
  *  @author gelin
  */
-public class PreferencesStorage {
+public class PreferencesStorage implements Constants {
     
-    /** Tag for logging */
-    final String TAG = getClass().getName();
-
     /** Preferences instance to save Bundle */
     SharedPreferences preferences;
     

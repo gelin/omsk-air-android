@@ -3,4 +3,5 @@
     <string name="app_name">Температура в Омске</string>
     <string name="now_in_omsk">Сейчас в Омске</string>
     <string name="date_format">EEE, d MMM yyyy HH:mm</string>
+    <string name="update_error">Не удалось обновить температуру: %s</string>
 </resources>

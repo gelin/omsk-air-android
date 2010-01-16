@@ -12,15 +12,13 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  *  Main activity of the application.
  */
 public class MainActivity extends Activity implements Constants {
 
-    /** Tag for logging */
-    final String TAG = getClass().getName();
-    
     /** Storage for the previous temperature values */
     PreferencesStorage storage;
     
@@ -39,17 +37,22 @@ public class MainActivity extends Activity implements Constants {
                 connection, BIND_AUTO_CREATE);
     }
 
-    /**	Called when the activity becomes active. */
     @Override
     public void onResume() {
         super.onResume();
-        if (service != null) {
-            try {
-                service.startUpdate();
-            } catch (RemoteException e) {
-                Log.w(TAG, "failed to start update", e);
-            }
-        }
+        startUpdate();
+    }
+    
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopUpdate();
+    }
+    
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unbindService(connection);
     }
     
     /**
@@ -57,14 +60,8 @@ public class MainActivity extends Activity implements Constants {
      */
     final ServiceConnection connection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder binder) {
-            UpdateServiceInterface service = 
-                    UpdateServiceInterface.Stub.asInterface(binder);
-            try {
-                service.registerCallback(callback);
-                service.startUpdate();
-            } catch (RemoteException e) {
-                Log.e(TAG, "failed to register callback", e);
-            }
+            service = UpdateServiceInterface.Stub.asInterface(binder);
+            startUpdate();
         }
         public void onServiceDisconnected(ComponentName name) {
             service = null;
@@ -78,7 +75,31 @@ public class MainActivity extends Activity implements Constants {
         public void onTemperatureUpdate(Bundle values) throws RemoteException {
             updateTemperatureViews(values);
         }
+        public void onError(String error) {
+            showError(error);
+        }
     };
+    
+    void startUpdate() {
+        if (service != null) {
+            try {
+                service.registerCallback(callback);
+                service.startUpdate();
+            } catch (RemoteException e) {
+                Log.w(TAG, "failed to start update", e);
+            }
+        }
+    }
+    
+    void stopUpdate() {
+        if (service != null) {
+            try {
+                service.unregisterCallback(callback);
+            } catch (RemoteException e) {
+                Log.w(TAG, "failed to unregister callback", e);
+            }
+        }
+    }
     
     void updateTemperatureViews(Bundle values) {
         float temp = values.getFloat(TEMPERATURE, Float.NaN);
@@ -104,6 +125,12 @@ public class MainActivity extends Activity implements Constants {
             return getResources().getString(R.string.no_temp);
         }
         return getResources().getString(R.string.temp_format, temperature);
+    }
+    
+    void showError(String error) {
+        String message = getResources().getString(R.string.update_error, error);
+        Toast toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
+        toast.show();
     }
 
 }

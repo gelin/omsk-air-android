@@ -18,9 +18,6 @@ import android.util.Log;
  */
 public class TemperatureGetter extends Thread implements Constants {
 
-    /** Tag for logging */
-    final String TAG = getClass().getName();
-    
     /**	URL of the temperature source */
     static final String URL = "http://myxa.opsb.ru/files/weather.js";
     
@@ -52,12 +49,13 @@ public class TemperatureGetter extends Thread implements Constants {
      * 	Runs the temperature getter.
      */
     public void run() {
+        Log.i(TAG, "update start");
         try {
             Bundle result = getTemperatureBundle(prevValues);
             sendResult(handler, result);
         } catch (Exception e) {
-            Log.e(TAG, "Failed to get temperature", e);
-            sendError(handler);
+            Log.e(TAG, "failed to get temperature", e);
+            sendError(handler, e);
         }
     }
 
@@ -128,8 +126,10 @@ public class TemperatureGetter extends Thread implements Constants {
     /**
      *  Sends error to the handler.
      */
-    static void sendError(Handler handler) {
-        handler.sendEmptyMessage(ERROR);
+    static void sendError(Handler handler, Exception error) {
+        Message message = handler.obtainMessage(ERROR);
+        message.obj = error.getMessage();
+        handler.sendMessage(message);
     }
 
 }

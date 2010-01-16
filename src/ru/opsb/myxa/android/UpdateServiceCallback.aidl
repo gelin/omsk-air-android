@@ -11,5 +11,10 @@ oneway interface UpdateServiceCallback {
      *  Called when new temperature value is got.
      */
     void onTemperatureUpdate(in Bundle values);
+    
+    /**
+     *  Called when the error occured during the temperature update.
+     */
+    void onError(in String error);
 
 }

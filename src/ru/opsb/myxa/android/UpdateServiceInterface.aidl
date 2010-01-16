@@ -8,7 +8,7 @@ import ru.opsb.myxa.android.UpdateServiceCallback;
  *  When update is finished, the result is pushed to registered
  *  callbacks.
  */
-interface UpdateServiceInterface {
+oneway interface UpdateServiceInterface {
 
     /**
      *  Registers callback for the temperature update.
