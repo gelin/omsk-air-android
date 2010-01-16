@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ public class MainActivity extends Activity implements Constants {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);
         storage = new PreferencesStorage(
                 getSharedPreferences(PREFERENCES ,MODE_PRIVATE));
@@ -40,6 +42,7 @@ public class MainActivity extends Activity implements Constants {
     @Override
     public void onResume() {
         super.onResume();
+        setProgressBarIndeterminateVisibility(true);
         startUpdate();
     }
     
@@ -74,9 +77,11 @@ public class MainActivity extends Activity implements Constants {
     final UpdateServiceCallback callback = new UpdateServiceCallback.Stub() {
         public void onTemperatureUpdate(Bundle values) throws RemoteException {
             updateTemperatureViews(values);
+            setProgressBarIndeterminateVisibility(false);
         }
         public void onError(String error) {
             showError(error);
+            setProgressBarIndeterminateVisibility(false);
         }
     };
     

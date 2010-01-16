@@ -108,6 +108,8 @@ public class UpdateService extends Service implements Constants {
             Bundle values = storage.get();
             if (isExpired(values)) {
                 new Thread(new TemperatureGetter(handler, values)).start();
+            } else {
+                sendUpdates(values);    //send old values as updated
             }
         }
 
