@@ -4,4 +4,6 @@
     <string name="now_in_omsk">Сейчас в Омске</string>
     <string name="date_format">EEE, d MMM yyyy HH:mm</string>
     <string name="update_error">Не удалось обновить температуру: %s</string>
+    <string name="refresh">Обновить</string>
+    <string name="locate">Где Омск?</string>
 </resources>

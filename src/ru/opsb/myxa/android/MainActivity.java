@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,7 +45,6 @@ public class MainActivity extends Activity implements Constants {
     @Override
     public void onResume() {
         super.onResume();
-        setProgressBarIndeterminateVisibility(true);
         startUpdate();
     }
     
@@ -57,6 +59,30 @@ public class MainActivity extends Activity implements Constants {
         super.onDestroy();
         unbindService(connection);
     }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        if (LOCATE_INTENT.resolveActivity(getPackageManager()) == null) {
+            menu.findItem(R.id.menu_locate).setVisible(false);
+        }
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.menu_refresh:
+            startUpdate();
+            return true;
+        case R.id.menu_locate:
+            startActivity(LOCATE_INTENT);
+            return true;
+        }
+        return false;
+    }
+    
     
     /**
      *  Handles connection with the service.
@@ -86,6 +112,7 @@ public class MainActivity extends Activity implements Constants {
     };
     
     void startUpdate() {
+        setProgressBarIndeterminateVisibility(true);
         if (service != null) {
             try {
                 service.registerCallback(callback);

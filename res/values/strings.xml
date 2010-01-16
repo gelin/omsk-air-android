@@ -6,4 +6,6 @@
     <string name="date_format">EEE, MMM d, yyyy hh:mm a</string>
     <string name="temp_format">%+.1f&#x00b0;C</string>
     <string name="update_error">Temperature update failed: %s</string>
+    <string name="refresh">Refresh</string>
+    <string name="locate">Where is Omsk?</string>
 </resources>

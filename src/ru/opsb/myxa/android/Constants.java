@@ -1,5 +1,8 @@
 package ru.opsb.myxa.android;
 
+import android.content.Intent;
+import android.net.Uri;
+
 public interface Constants {
     
     /** Tag for logging */
@@ -17,5 +20,14 @@ public interface Constants {
     public static final int TEMPERATURE_UPDATE = 0;
     /** Message.what = error */
     public static final int ERROR = 1;
+    
+    /** Intent to open Omsk on the map. */
+    public Intent LOCATE_INTENT = new Intent(Intent.ACTION_VIEW, 
+            Uri.parse("geo:" +
+                    "54.99297920300393,73.36321234703064" +
+                    //these actually points to the building where 
+                    //the temperature sensor is located
+                    "?z=4"
+                    ));
 
 }
