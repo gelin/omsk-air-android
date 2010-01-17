@@ -6,4 +6,5 @@
     <string name="update_error">Не удалось обновить температуру: %s</string>
     <string name="refresh">Обновить</string>
     <string name="locate">Где Омск?</string>
+    <string name="omsk">Омск</string>
 </resources>

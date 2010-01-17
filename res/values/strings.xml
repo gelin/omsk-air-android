@@ -8,4 +8,6 @@
     <string name="update_error">Temperature update failed: %s</string>
     <string name="refresh">Refresh</string>
     <string name="locate">Where is Omsk?</string>
+    <string name="omsk">Omsk</string>
+    <string name="widget_temp_format">%+.0f&#x00b0;</string>
 </resources>
