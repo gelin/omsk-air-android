@@ -1,16 +1,16 @@
 package ru.opsb.myxa.android;
 
 import android.app.PendingIntent;
+import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Log;
+import android.os.Message;
 import android.widget.RemoteViews;
 
 public class TemperatureAppWidgetProvider extends AppWidgetProvider 
@@ -60,48 +60,56 @@ public class TemperatureAppWidgetProvider extends AppWidgetProvider
     }
 
     static void startUpdate(Context context) {
-        Updater updater = new Updater(context);
-        context.bindService(new Intent(UpdateServiceInterface.class.getName()),
-                updater, Context.BIND_AUTO_CREATE);
+        context.startService(new Intent(context, UpdateService.class));
     }
     
     /**
-     *  Handles connection with the service.
+     *  Updates widget after receiving new temperature.
      */
-    static class Updater extends UpdateServiceCallback.Stub 
-            implements ServiceConnection {
+    public static class UpdateService extends Service {
 
-        Context context;
-        UpdateServiceInterface service;
+        @Override
+        public void onStart(Intent intent, int startId) {
+            RemoteViews views = new RemoteViews(
+                    getPackageName(), R.layout.appwidget);
+            Handler handler = new UpdateHandler(this, views);
+            TemperatureUpdater updater = new TemperatureUpdater(
+                    handler, getSharedPreferences(PREFERENCES, MODE_PRIVATE));
+            updater.run();
+            
+            ComponentName thisWidget = 
+                    new ComponentName(this, TemperatureAppWidgetProvider.class);
+            AppWidgetManager manager = AppWidgetManager.getInstance(this);
+            manager.updateAppWidget(thisWidget, views);
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+
+    }
+    
+    /**
+     *  Handles temperature updates.
+     */
+    static class UpdateHandler extends Handler {
         
-        public Updater(Context context) {
+        Context context;
+        RemoteViews views;
+        
+        public UpdateHandler(Context context, RemoteViews views) {
             this.context = context;
+            this.views = views;
         }
         
-        public void onServiceConnected(ComponentName className, IBinder binder) {
-            service = UpdateServiceInterface.Stub.asInterface(binder);
-            if (service != null) {
-                try {
-                    service.registerCallback(this);
-                    service.startUpdate();
-                } catch (RemoteException e) {
-                    Log.w(TAG, "failed to start update", e);
-                }
+        public void handleMessage(Message msg) {
+            if (msg.what == TEMPERATURE_UPDATE) {
+                Bundle values = msg.getData();
+                updateWidgetViews(context, views, values);
             }
         }
-        public void onServiceDisconnected(ComponentName name) {
-            service = null;
-        }
-
-        public void onTemperatureUpdate(Bundle values) {
-            RemoteViews views = new RemoteViews(
-                    context.getPackageName(), R.layout.appwidget);
-            updateWidgetViews(context, views, values);
-        }
-        public void onError(String error) {
-            //nothing to do on widget
-        }
-
+        
     }
 
 }
