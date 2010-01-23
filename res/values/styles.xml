@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Widget">
+        <item name="android:background">@drawable/widget_bg</item>
+    </style>
+    <style name="WidgetText" parent="android:style/TextAppearance.Large">
+        <item name="android:textSize">28dp</item>
+    </style>
+    <style name="WidgetSubtitle" parent="android:style/TextAppearance.Small">
+        <item name="android:textSize">12dp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+</resources>
