@@ -22,9 +22,6 @@ public class MainActivity extends Activity implements Constants {
     /** Storage for the previous temperature values */
     PreferencesStorage storage;
     
-    /** Link to service. */
-    UpdateServiceInterface service;
-    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
