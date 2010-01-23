@@ -15,12 +15,6 @@
             </intent-filter>
         </activity>
         
-        <service android:name=".UpdateService">
-            <intent-filter>
-                <action android:name="ru.opsb.myxa.android.UpdateServiceInterface"/>
-            </intent-filter>
-        </service>
-        
         <receiver android:name="TemperatureAppWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>

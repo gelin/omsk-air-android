@@ -4,13 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -38,8 +34,6 @@ public class MainActivity extends Activity implements Constants {
         storage = new PreferencesStorage(
                 getSharedPreferences(PREFERENCES ,MODE_PRIVATE));
         updateTemperatureViews(storage.get());
-        bindService(new Intent(UpdateServiceInterface.class.getName()),
-                connection, BIND_AUTO_CREATE);
     }
 
     @Override
@@ -49,15 +43,8 @@ public class MainActivity extends Activity implements Constants {
     }
     
     @Override
-    public void onPause() {
-        super.onPause();
-        stopUpdate();
-    }
-    
-    @Override
     public void onDestroy() {
         super.onDestroy();
-        unbindService(connection);
     }
     
     @Override
@@ -83,54 +70,30 @@ public class MainActivity extends Activity implements Constants {
         return false;
     }
     
-    
-    /**
-     *  Handles connection with the service.
-     */
-    final ServiceConnection connection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder binder) {
-            service = UpdateServiceInterface.Stub.asInterface(binder);
-            startUpdate();
-        }
-        public void onServiceDisconnected(ComponentName name) {
-            service = null;
-        }
-    };
-    
     /**
      *  Handles temperature updates.
      */
-    final UpdateServiceCallback callback = new UpdateServiceCallback.Stub() {
-        public void onTemperatureUpdate(Bundle values) throws RemoteException {
-            updateTemperatureViews(values);
-            setProgressBarIndeterminateVisibility(false);
-        }
-        public void onError(String error) {
-            showError(error);
-            setProgressBarIndeterminateVisibility(false);
+    final Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case TEMPERATURE_UPDATE:
+                Bundle values = msg.getData();
+                updateTemperatureViews(values);
+                setProgressBarIndeterminateVisibility(false);
+                break;
+            case ERROR:
+                showError(String.valueOf(msg.obj));
+                setProgressBarIndeterminateVisibility(false);
+                break;
+            }
         }
     };
     
     void startUpdate() {
         setProgressBarIndeterminateVisibility(true);
-        if (service != null) {
-            try {
-                service.registerCallback(callback);
-                service.startUpdate();
-            } catch (RemoteException e) {
-                Log.w(TAG, "failed to start update", e);
-            }
-        }
-    }
-    
-    void stopUpdate() {
-        if (service != null) {
-            try {
-                service.unregisterCallback(callback);
-            } catch (RemoteException e) {
-                Log.w(TAG, "failed to unregister callback", e);
-            }
-        }
+        Thread updater = new Thread(new TemperatureUpdater(handler, 
+                getSharedPreferences(PREFERENCES ,MODE_PRIVATE)));
+        updater.start();
     }
     
     void updateTemperatureViews(Bundle values) {
