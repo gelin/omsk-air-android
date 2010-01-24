@@ -107,6 +107,8 @@ public class UpdateService extends Service implements Constants, Runnable {
             updateWidgets(this, oldValues); //immediately update widgets with old values
         }
 
+        shedulerNextRun();
+
         synchronized (lock) {
             if (threadRunning) {
                 return;     // only start processing thread if not already running
@@ -127,8 +129,6 @@ public class UpdateService extends Service implements Constants, Runnable {
      *  remain. Also sets alarm to perform next update.
      */
     public void run() {
-        shedulerNextRun();
-        
         Handler handler = new UpdateHandler(this);
         TemperatureUpdater updater = new TemperatureUpdater(
                 handler, getSharedPreferences(TemperatureWidget.PREFERENCES, MODE_PRIVATE));
