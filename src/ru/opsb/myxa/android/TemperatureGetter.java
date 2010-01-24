@@ -101,6 +101,8 @@ public class TemperatureGetter implements Runnable, Constants {
      * 	Parses the temperature, encoded in JavaScript code.
      */
     float parseTemperature(String js) {
+        //for test
+        //return 0.0f;
         Matcher m = JS_PATTERN.matcher(js);
         if (!m.find()) {
             Log.w(TAG, "Failed to parse: " + js);

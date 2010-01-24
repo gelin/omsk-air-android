@@ -64,15 +64,17 @@ public class TemperatureWidget extends AppWidgetProvider
         views.setTextViewText(R.id.temp_value, 
                 String.valueOf(calendar.get(Calendar.MINUTE)));
         */
-        //views.setTextViewText(R.id.temp_value, formatTemperature(context, -55.5f));
+        //views.setTextViewText(R.id.temp_value, formatTemperature(context, -0.5f));
     }
     
     static String formatTemperature(Context context, float temperature) {
         if (Float.isNaN(temperature)) {
             return context.getResources().getString(R.string.no_temp);
+        } else if (Math.abs(temperature) <= 1) {
+            return context.getResources().getString(R.string.widget_zero_temp);
         }
         return context.getResources().getString(
-                R.string.widget_temp_format, temperature);
+                R.string.widget_temp_format, (int)temperature);
     }
 
 }

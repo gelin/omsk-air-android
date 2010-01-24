@@ -5,9 +5,11 @@
     <string name="no_temp">\?</string>
     <string name="date_format">EEE, MMM d, yyyy hh:mm a</string>
     <string name="temp_format">%+.1f&#x00b0;C</string>
+    <string name="zero_temp">0&#x00b0;C</string>
     <string name="update_error">Temperature update failed: %s</string>
     <string name="refresh">Refresh</string>
     <string name="locate">Where is Omsk?</string>
     <string name="omsk">Omsk</string>
-    <string name="widget_temp_format">%+.0f&#x00b0;</string>
+    <string name="widget_temp_format">%+d&#x00b0;</string>
+    <string name="widget_zero_temp">0&#x00b0;</string>
 </resources>

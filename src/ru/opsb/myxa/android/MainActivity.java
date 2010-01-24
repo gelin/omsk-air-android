@@ -117,6 +117,8 @@ public class MainActivity extends Activity implements Constants {
     String formatTemperature(float temperature) {
         if (Float.isNaN(temperature)) {
             return getResources().getString(R.string.no_temp);
+        } else if (Math.abs(temperature) <= 0.1f) {
+            return getResources().getString(R.string.zero_temp);
         }
         return getResources().getString(R.string.temp_format, temperature);
     }
