@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -77,6 +78,7 @@ public class MainActivity extends Activity implements Constants {
                 Bundle values = msg.getData();
                 updateTemperatureViews(values);
                 setProgressBarIndeterminateVisibility(false);
+                updateWidgets();
                 break;
             case ERROR:
                 showError(String.valueOf(msg.obj));
@@ -123,6 +125,12 @@ public class MainActivity extends Activity implements Constants {
         String message = getResources().getString(R.string.update_error, error);
         Toast toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
         toast.show();
+    }
+    
+    void updateWidgets() {
+        Intent updateIntent = new Intent(UpdateService.ACTION_UPDATE_ALL);
+        updateIntent.setClass(this, UpdateService.class);
+        startService(updateIntent);
     }
 
 }

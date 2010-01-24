@@ -57,7 +57,6 @@ public class TemperatureUpdater implements Runnable, Constants {
         //calendar.add(Calendar.MINUTE, -1);
         return lastModified < calendar.getTimeInMillis();   //strongly less! 
     }
-    
 
     /**
      *  Handles temperature updates.

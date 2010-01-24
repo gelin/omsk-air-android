@@ -2,7 +2,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="72dp"
     android:minHeight="72dp"
-    android:updatePeriodMillis="3600000"
-    android:initialLayout="@layout/appwidget">
-    <!-- one cell widget, updates once per hour -->
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget">
+    <!-- one cell widget, updates handles by service -->
 </appwidget-provider>
