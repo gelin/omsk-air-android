@@ -11,6 +11,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -47,6 +48,11 @@ public class UpdateService extends Service implements Constants, Runnable {
      *  sure your access is correctly synchronized.
      */
     private static Queue<Integer> widgetIds = new LinkedList<Integer>();
+    
+    /**
+     *  Updater for the temperature values.
+     */
+    TemperatureUpdater updater;
     
     /**
      *  Request updates for the given widgets. Will only queue them up, you are
@@ -95,9 +101,11 @@ public class UpdateService extends Service implements Constants, Runnable {
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
 
-        PreferencesStorage storage = new PreferencesStorage(
-                getSharedPreferences(PREFERENCES, MODE_PRIVATE));
+        SharedPreferences preferences = 
+                getSharedPreferences(PREFERENCES, MODE_PRIVATE); 
+        PreferencesStorage storage = new PreferencesStorage(preferences);
         Bundle oldValues = storage.get();
+        updater = new TemperatureUpdater(handler, preferences);
         
         // if requested, trigger update of all widgets
         if (ACTION_UPDATE_ALL.equals(intent.getAction())) {
@@ -129,34 +137,22 @@ public class UpdateService extends Service implements Constants, Runnable {
      *  remain. Also sets alarm to perform next update.
      */
     public void run() {
-        Handler handler = new UpdateHandler(this);
-        TemperatureUpdater updater = new TemperatureUpdater(
-                handler, getSharedPreferences(TemperatureWidget.PREFERENCES, MODE_PRIVATE));
         updater.run();
-        
         stopSelf();
     }
     
     /**
      *  Handles temperature updates.
      */
-    static class UpdateHandler extends Handler {
-
-        Context context;
-
-        public UpdateHandler(Context context) {
-            this.context = context;
-        }
-
+    final Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             if (msg.what == TEMPERATURE_UPDATE) {
                 Bundle values = msg.getData();
-                updateWidgets(context, values);
+                updateWidgets(UpdateService.this, values);
             }
         }
-        
-    }
-
+    };
+    
     /**
      *  Sets alarm to next run.
      */
