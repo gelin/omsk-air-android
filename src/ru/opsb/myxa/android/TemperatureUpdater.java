@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 /**
  *  Requests the server for new temperature values and saves new
@@ -66,6 +67,7 @@ public class TemperatureUpdater implements Runnable, Constants {
             if (msg.what == TEMPERATURE_UPDATE) {
                 Bundle values = msg.getData();
                 storage.put(values);
+                Log.i(TAG, "temperature: " + values.getFloat(TEMPERATURE));
             }
             handler.handleMessage(msg);     //propagate message
         }

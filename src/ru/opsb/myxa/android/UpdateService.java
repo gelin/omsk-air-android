@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 /**
@@ -110,9 +111,11 @@ public class UpdateService extends Service implements Constants, Runnable {
         // if requested, trigger update of all widgets
         if (ACTION_UPDATE_ALL.equals(intent.getAction())) {
             AppWidgetManager manager = AppWidgetManager.getInstance(this);
-            requestUpdate(manager.getAppWidgetIds(
-                    new ComponentName(this, TemperatureWidget.class)));
+            int[] ids = manager.getAppWidgetIds(
+                    new ComponentName(this, TemperatureWidget.class));
+            requestUpdate(ids);
             updateWidgets(this, oldValues); //immediately update widgets with old values
+            requestUpdate(ids);     //update the same IDs later, when new temperature values come
         }
 
         shedulerNextRun();
@@ -174,6 +177,8 @@ public class UpdateService extends Service implements Constants, Runnable {
      *  Immediately updates widgets with specified values.
      */
     static void updateWidgets(Context context, Bundle values) {
+        Log.d(TAG, "updating widgets");
+        
         AppWidgetManager manager = 
                 AppWidgetManager.getInstance(context);
         RemoteViews updateViews = 
@@ -210,6 +215,7 @@ public class UpdateService extends Service implements Constants, Runnable {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.add(Calendar.HOUR_OF_DAY, 1);  //next hour
+        //calendar.add(Calendar.MINUTE, 1);  //next minute
         return calendar.getTimeInMillis();
     }
 

@@ -49,7 +49,7 @@ public class TemperatureGetter implements Runnable, Constants {
      * 	Runs the temperature getter.
      */
     public void run() {
-        Log.i(TAG, "update start");
+        Log.d(TAG, "update start");
         try {
             Bundle result = getTemperatureBundle(prevValues);
             sendResult(handler, result);
