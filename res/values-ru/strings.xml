@@ -7,4 +7,13 @@
     <string name="refresh">Обновить</string>
     <string name="locate">Где Омск?</string>
     <string name="omsk">Омск</string>
+    <string name="display_notification">Показывать уведомление</string>
+    <string name="display_notification_summary">Показывать значение температуры в строке уведомлений</string>
+    <string name="refresh_interval">Период обновления</string>
+    <string name="refresh_interval_summary">Как часто обновлять значение температуры</string>
+    <string name="refresh_15m">Каждые 15 минут</string>
+    <string name="refresh_30m">Каждые 30 минут</string>
+    <string name="refresh_1h">Каждый час</string>
+    <string name="refresh_3h">Каждые 3 часа</string>
+    <string name="preferences">Настройки</string>
 </resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference android:key="notification"
+            android:defaultValue="false"
+            android:title="@string/display_notification"
+            android:summary="@string/display_notification_summary"/>
+            
+    <ListPreference android:key="refresh"
+            android:defaultValue="1h"
+            android:title="@string/refresh_interval"
+            android:summary="@string/refresh_interval_summary"
+            android:entries="@array/refresh_entries"
+            android:entryValues="@array/refresh_values"/>
+
+</PreferenceScreen>

@@ -64,6 +64,8 @@ public class MainActivity extends Activity implements Constants {
         case R.id.menu_locate:
             startActivity(LOCATE_INTENT);
             return true;
+        case R.id.menu_preferences:
+            startActivity(new Intent(this, Preferences.class));
         }
         return false;
     }
