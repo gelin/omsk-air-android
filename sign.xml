@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="omsk-air-android" default="sign">
+
+    <property file="local.properties" />
+    <property file="build.properties" />
+    <property file="default.properties" />
+
+    <target name="sign" depends="jarsigner, zipalign"
+	description="Sign and align the unsigned application"/>
+
+    <target name="jarsigner">
+	<input message="Enter Passphrase for keystore:"
+		addproperty="key.password"/>
+	<signjar jar="bin/${ant.project.name}-unsigned.apk"
+		 signedJar="bin/${ant.project.name}-unaligned.apk"
+		alias="${key.alias}" keystore="${key.store}"
+		storepass="${key.password}"
+		verbose="true"/>
+    </target>
+
+    <target name="zipalign">
+	<exec executable="${sdk.dir}/tools/zipalign" failonerror="true">
+	    <arg value="-f"/>
+    	    <arg value="-v"/>
+            <arg value="4"/>
+            <arg path="bin/${ant.project.name}-unaligned.apk"/>
+	    <arg path="bin/${ant.project.name}-release.apk"/>
+        </exec>
+    </target>
+
+</project>

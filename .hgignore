@@ -1,4 +1,6 @@
 syntax: glob
 bin/*
 gen/*
+local.properties
+build.properties
 
