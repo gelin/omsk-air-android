@@ -29,5 +29,8 @@ public interface Constants {
                     //the temperature sensor is located
                     "?z=6"
                     ));
+    
+    /** Preferences key for notification */
+    public static final String NOTIFICATION = "notification";
 
 }

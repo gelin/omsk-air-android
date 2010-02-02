@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -114,7 +116,7 @@ public class UpdateService extends Service implements Constants, Runnable {
             int[] ids = manager.getAppWidgetIds(
                     new ComponentName(this, TemperatureWidget.class));
             requestUpdate(ids);
-            updateWidgets(this, oldValues); //immediately update widgets with old values
+            updateAll(this, oldValues); //immediately update widgets with old values
             requestUpdate(ids);     //update the same IDs later, when new temperature values come
         }
 
@@ -151,7 +153,7 @@ public class UpdateService extends Service implements Constants, Runnable {
         public void handleMessage(Message msg) {
             if (msg.what == TEMPERATURE_UPDATE) {
                 Bundle values = msg.getData();
-                updateWidgets(UpdateService.this, values);
+                updateAll(UpdateService.this, values);
             }
         }
     };
@@ -171,6 +173,21 @@ public class UpdateService extends Service implements Constants, Runnable {
         AlarmManager alarmManager = (AlarmManager)getSystemService(
                 Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC, nextUpdate, pendingIntent);  //RTC_WAKEUP ???
+    }
+    
+    /**
+     *  Immediately updates widgets and notification bar.
+     */
+    static void updateAll(Context context, Bundle values) {
+        updateNotification(context, values);
+        updateWidgets(context, values);
+    }
+    
+    /**
+     *  Immediately updates notification in the status bar.
+     */
+    static void updateNotification(Context context, Bundle values) {
+        TemperatureNotification.update(context, values);
     }
     
     /**

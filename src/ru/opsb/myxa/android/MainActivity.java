@@ -80,7 +80,7 @@ public class MainActivity extends Activity implements Constants {
                 Bundle values = msg.getData();
                 updateTemperatureViews(values);
                 setProgressBarIndeterminateVisibility(false);
-                updateWidgets();
+                updateAll();
                 break;
             case ERROR:
                 showError(String.valueOf(msg.obj));
@@ -131,7 +131,7 @@ public class MainActivity extends Activity implements Constants {
         toast.show();
     }
     
-    void updateWidgets() {
+    void updateAll() {
         Intent updateIntent = new Intent(UpdateService.ACTION_UPDATE_ALL);
         updateIntent.setClass(this, UpdateService.class);
         startService(updateIntent);

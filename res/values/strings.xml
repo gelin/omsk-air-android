@@ -21,4 +21,9 @@
     <string name="refresh_1h">Every hour</string>
     <string name="refresh_3h">Every 3 hours</string>
     <string name="preferences">Preferences</string>
+    <string name="notification_ticker">%+d&#x00b0; in Omsk</string>
+    <string name="notification_title">Now in Omsk %+.1f&#x00b0;C</string>
+    <string name="notification_ticker_zero">0&#x00b0; in Omsk</string>
+    <string name="notification_title_zero">Now in Omsk 0&#x00b0;C</string>
+    <string name="notification_text">Air temperature in the Omsk center</string>
 </resources>

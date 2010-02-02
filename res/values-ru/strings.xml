@@ -16,4 +16,9 @@
     <string name="refresh_1h">Каждый час</string>
     <string name="refresh_3h">Каждые 3 часа</string>
     <string name="preferences">Настройки</string>
+    <string name="notification_ticker">В Омске %+d&#x00b0;</string>
+    <string name="notification_title">Сейчас в Омске %+.1f&#x00b0;C</string>
+    <string name="notification_ticker_zero">В Омске 0&#x00b0;</string>
+    <string name="notification_title_zero">Сейчас в Омске 0&#x00b0;C</string>
+    <string name="notification_text">Температура воздуха в центре Омска</string>
 </resources>
