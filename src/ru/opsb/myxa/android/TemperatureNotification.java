@@ -19,6 +19,8 @@ public class TemperatureNotification extends Notification
 
     /** Notification ID */
     static final int ID = 1;
+    /** Temperature image prefix */
+    static final String RES_PREFIX="temp";
     
     public static void update(Context context, Bundle values) {
         Log.d(TAG, "updating notification");
@@ -42,7 +44,7 @@ public class TemperatureNotification extends Notification
         float temp = values.getFloat(TEMPERATURE);
         long lastModified = values.getLong(LAST_MODIFIED);
         Resources res = context.getResources();
-        this.icon = R.drawable.temp_0;
+        this.icon = getIconResource(res, temp);
         this.tickerText = formatTicker(res, temp);
         this.when = lastModified;
         this.flags |= FLAG_NO_CLEAR;
@@ -50,6 +52,27 @@ public class TemperatureNotification extends Notification
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
         setLatestEventInfo(context, formatTitle(res, temp), 
                 formatText(res, temp), pendingIntent);
+    }
+    
+    static int getIconResource(Resources res, float temperature) {
+        int temp = (int)temperature;
+        if (temp < -50) {
+            temp = -50;
+        }
+        if (temp > 50) {
+            temp = 50;
+        }
+        StringBuilder resName = new StringBuilder(RES_PREFIX);
+        if (temp < 0) {
+            resName.append("_minus");
+        } else if (temp > 0) {
+            
+            resName.append("_plus");
+        }
+        resName.append("_").append(String.valueOf(Math.abs(temp)));
+        Log.d(TAG, "notification image: " + resName);
+        return res.getIdentifier(resName.toString(),
+                "drawable", R.class.getPackage().getName());
     }
     
     static String formatTicker(Resources res, float temperature) {
