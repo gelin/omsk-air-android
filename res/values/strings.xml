@@ -12,7 +12,7 @@
     <string name="omsk">Omsk</string>
     <string name="widget_temp_format">%+d&#x00b0;</string>
     <string name="widget_zero_temp">0&#x00b0;</string>
-    <string name="display_notification">Display notification</string>
+    <string name="display_notification">Notification</string>
     <string name="display_notification_summary">Display the temperature value in the notification bar</string>
     <string name="refresh_interval">Refresh interval</string>
     <string name="refresh_interval_summary">How often update the temperature value</string>
@@ -20,7 +20,7 @@
     <string name="refresh_30m">Every 30 minutes</string>
     <string name="refresh_1h">Every hour</string>
     <string name="refresh_3h">Every 3 hours</string>
-    <string name="preferences">Preferences</string>
+    <string name="preferences">Settings</string>
     <string name="notification_ticker">%+d&#x00b0; in Omsk</string>
     <string name="notification_title">Now in Omsk %+.1f&#x00b0;C</string>
     <string name="notification_ticker_zero">0&#x00b0; in Omsk</string>
