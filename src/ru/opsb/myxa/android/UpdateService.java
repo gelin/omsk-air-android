@@ -4,6 +4,9 @@ import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import ru.opsb.myxa.android.periods.Period;
+import ru.opsb.myxa.android.periods.PeriodFactory;
+
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -52,10 +55,11 @@ public class UpdateService extends Service implements Constants, Runnable {
      */
     private static Queue<Integer> widgetIds = new LinkedList<Integer>();
     
-    /**
-     *  Updater for the temperature values.
-     */
+    /** Updater for the temperature values. */
     TemperatureUpdater updater;
+    
+    /** Update period */
+    Period period;
     
     /**
      *  Request updates for the given widgets. Will only queue them up, you are
@@ -104,6 +108,11 @@ public class UpdateService extends Service implements Constants, Runnable {
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
 
+        SharedPreferences config = 
+                PreferenceManager.getDefaultSharedPreferences(this);
+        period = PeriodFactory.createPeriod(
+                config.getString(REFRESH, PeriodFactory.ONE_HOUR_PERIOD));
+        
         SharedPreferences preferences = 
                 getSharedPreferences(PREFERENCES, MODE_PRIVATE); 
         PreferencesStorage storage = new PreferencesStorage(preferences);
@@ -162,7 +171,7 @@ public class UpdateService extends Service implements Constants, Runnable {
      *  Sets alarm to next run.
      */
     void shedulerNextRun() {
-        long nextUpdate = getNextUpdate(System.currentTimeMillis());
+        long nextUpdate = getNextStart();
         
         Intent updateIntent = new Intent(ACTION_UPDATE_ALL);
         updateIntent.setClass(this, UpdateService.class);
@@ -213,27 +222,16 @@ public class UpdateService extends Service implements Constants, Runnable {
      *  Checks is the temperature values expired.
      *  Expiration period here is one hour.
      */
-    static boolean isExpired(Bundle values) {
+    boolean isExpired(Bundle values) {
         long lastModified = values.getLong(LAST_MODIFIED);
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.MINUTE, 0);    //this hour with zero minutes
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return lastModified < calendar.getTimeInMillis();   //strongly less! 
+        return period.isExpired(lastModified);
     }
     
     /**
      *  Calculates next update time.
      */
-    static long getNextUpdate(long now) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(now);
-        calendar.set(Calendar.MINUTE, 0);    //this hour with zero minutes
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        calendar.add(Calendar.HOUR_OF_DAY, 1);  //next hour
-        //calendar.add(Calendar.MINUTE, 1);  //next minute
-        return calendar.getTimeInMillis();
+    long getNextStart() {
+        return period.getNextStart();
     }
 
     @Override

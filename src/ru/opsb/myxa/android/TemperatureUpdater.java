@@ -2,6 +2,9 @@ package ru.opsb.myxa.android;
 
 import java.util.Calendar;
 
+import ru.opsb.myxa.android.periods.Period;
+import ru.opsb.myxa.android.periods.PeriodFactory;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -52,11 +55,8 @@ public class TemperatureUpdater implements Runnable, Constants {
      */
     static boolean isExpired(Bundle values) {
         long lastModified = values.getLong(LAST_MODIFIED);
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.SECOND, 0);   //this minute with zero seconds
-        calendar.set(Calendar.MILLISECOND, 0);
-        //calendar.add(Calendar.MINUTE, -1);
-        return lastModified < calendar.getTimeInMillis();   //strongly less! 
+        Period period = PeriodFactory.createPeriod(PeriodFactory.ONE_MINUTE_PERIOD);
+        return period.isExpired(lastModified);
     }
 
     /**

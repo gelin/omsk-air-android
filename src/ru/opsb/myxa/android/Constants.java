@@ -32,5 +32,7 @@ public interface Constants {
     
     /** Preferences key for notification */
     public static final String NOTIFICATION = "notification";
+    /** Preferences key for refresh period */
+    public static final String REFRESH = "refresh";
 
 }
