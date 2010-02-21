@@ -4,10 +4,23 @@
         <item name="android:background">@drawable/widget_bg</item>
     </style>
     <style name="WidgetText" parent="android:style/TextAppearance.Large">
-        <item name="android:textSize">28dp</item>
+        <item name="android:textSize">24dp</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
     <style name="WidgetSubtitle" parent="android:style/TextAppearance.Small">
         <item name="android:textSize">12dp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+    
+    <style name="HTCWidget">
+        <item name="android:background">@drawable/htc_widget_bg</item>
+    </style>
+    <style name="HTCWidgetText" parent="android:style/TextAppearance.Large">
+        <item name="android:textSize">28dp</item>
         <item name="android:textColor">@android:color/white</item>
     </style>
+    <style name="HTCWidgetSubtitle" parent="android:style/TextAppearance.Small">
+        <item name="android:textSize">12dp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>    
 </resources>

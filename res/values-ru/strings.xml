@@ -21,4 +21,6 @@
     <string name="notification_ticker_zero">В Омске 0&#x00b0;</string>
     <string name="notification_title_zero">Сейчас в Омске 0&#x00b0;C</string>
     <string name="notification_text">Температура воздуха в центре Омска</string>
+    <string name="style">Стиль</string>
+    <string name="style_summary">Стиль оформления уведомлений и виджета</string>
 </resources>

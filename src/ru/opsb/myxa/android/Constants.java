@@ -34,5 +34,9 @@ public interface Constants {
     public static final String NOTIFICATION = "notification";
     /** Preferences key for refresh period */
     public static final String REFRESH = "refresh";
+    /** Preferences key for style */
+    public static final String STYLE = "style";
+    /** HTC style value */
+    public static final String HTC = "htc";
 
 }

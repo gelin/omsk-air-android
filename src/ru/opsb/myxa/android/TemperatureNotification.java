@@ -44,7 +44,7 @@ public class TemperatureNotification extends Notification
         float temp = values.getFloat(TEMPERATURE);
         long lastModified = values.getLong(LAST_MODIFIED);
         Resources res = context.getResources();
-        this.icon = getIconResource(res, temp);
+        this.icon = getIconResource(context, res, temp);
         this.tickerText = formatTicker(res, temp);
         this.when = lastModified;
         this.flags |= FLAG_NO_CLEAR;
@@ -54,7 +54,7 @@ public class TemperatureNotification extends Notification
                 formatText(res, temp), pendingIntent);
     }
     
-    static int getIconResource(Resources res, float temperature) {
+    static int getIconResource(Context context, Resources res, float temperature) {
         int temp = (int)temperature;
         if (temp < -50) {
             temp = -50;
@@ -62,7 +62,16 @@ public class TemperatureNotification extends Notification
         if (temp > 50) {
             temp = 50;
         }
-        StringBuilder resName = new StringBuilder(RES_PREFIX);
+        StringBuilder resName = new StringBuilder();
+        
+        SharedPreferences prefs = 
+            PreferenceManager.getDefaultSharedPreferences(context);
+        if (HTC.equals(prefs.getString(STYLE, ""))) {
+            resName.append("htc_");
+        }
+        
+        resName.append(RES_PREFIX);
+        
         if (temp < 0) {
             resName.append("_minus");
         } else if (temp > 0) {

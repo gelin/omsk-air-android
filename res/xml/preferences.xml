@@ -12,5 +12,12 @@
             android:summary="@string/refresh_interval_summary"
             android:entries="@array/refresh_entries"
             android:entryValues="@array/refresh_values"/>
+            
+    <ListPreference android:key="style"
+            android:defaultValue=""
+            android:title="@string/style"
+            android:summary="@string/style_summary"
+            android:entries="@array/style_entries"
+            android:entryValues="@array/style_values"/>
 
 </PreferenceScreen>

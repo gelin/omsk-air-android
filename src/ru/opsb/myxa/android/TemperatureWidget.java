@@ -6,7 +6,9 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
 
 /**
@@ -41,8 +43,16 @@ public class TemperatureWidget extends AppWidgetProvider
      *  @param  values  values of the temperature to update
      */
     public static RemoteViews buildUpdate(Context context, Bundle values) {
+        int layout = R.layout.widget;
+        
+        SharedPreferences prefs = 
+            PreferenceManager.getDefaultSharedPreferences(context);
+        if (HTC.equals(prefs.getString(STYLE, ""))) {
+            layout = R.layout.htc_widget;
+        }
+        
         RemoteViews views = new RemoteViews(
-                context.getPackageName(), R.layout.widget);
+                context.getPackageName(), layout);
         setUpOnClick(context, views);
         updateWidgetViews(context, views, values);
         return views;

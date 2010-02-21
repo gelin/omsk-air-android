@@ -1,10 +1,7 @@
 package ru.opsb.myxa.android;
 
-import java.util.Calendar;
-
 import ru.opsb.myxa.android.periods.Period;
 import ru.opsb.myxa.android.periods.PeriodFactory;
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;

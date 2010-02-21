@@ -1,14 +1,11 @@
 package ru.opsb.myxa.android;
 
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import ru.opsb.myxa.android.periods.Period;
 import ru.opsb.myxa.android.periods.PeriodFactory;
-
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
