@@ -27,7 +27,8 @@ public interface Constants {
                     "54.99297920300393,73.36321234703064" +
                     //these actually points to the building where 
                     //the temperature sensor is located
-                    "?z=6"
+                    "?q=Omsk,+Russia" +
+                    "&z=6"
                     ));
     
     /** Preferences key for notification */
