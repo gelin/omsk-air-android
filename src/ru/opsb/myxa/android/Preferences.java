@@ -10,23 +10,23 @@ import android.preference.PreferenceManager;
 /**
  *  Activity to display application preferences.
  */
-public class Preferences extends PreferenceActivity 
+public class Preferences extends PreferenceActivity
         implements OnSharedPreferenceChangeListener {
 
     /** Shared preferences which saves configuration options
      *  displayed by this activity. */
     SharedPreferences prefs;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
-        
+
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
     }
-    
+
     @Override
     public void onResume() {
         super.onResume();
@@ -35,7 +35,7 @@ public class Preferences extends PreferenceActivity
         }
         prefs.registerOnSharedPreferenceChangeListener(this);
     }
-    
+
     @Override
     public void onPause() {
         super.onPause();
@@ -47,9 +47,7 @@ public class Preferences extends PreferenceActivity
 
     public void onSharedPreferenceChanged(
             SharedPreferences prefs, String name) {
-        Intent updateIntent = new Intent(UpdateService.ACTION_UPDATE_ALL);
-        updateIntent.setClass(this, UpdateService.class);
-        startService(updateIntent);
+        startService(UpdateService.UPDATE_ALL_INTENT);
     }
 
 }

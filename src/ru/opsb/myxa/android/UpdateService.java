@@ -31,33 +31,43 @@ public class UpdateService extends Service implements Constants, Runnable {
      *  Specific {@link Intent#setAction(String)} used when performing a full
      *  update of all widgets, usually when an update alarm goes off.
      */
-    public static final String ACTION_UPDATE_ALL = 
+    public static final String ACTION_UPDATE_ALL =
             UpdateService.class.getPackage() + ".UPDATE_ALL";
-    
+
+    /**
+     *  Intent to start this service to update all widgets and notifications.
+     */
+    public static final Intent UPDATE_ALL_INTENT = new Intent(ACTION_UPDATE_ALL);
+    static {
+        UPDATE_ALL_INTENT.setClassName(
+                UpdateService.class.getPackage().getName(),
+                UpdateService.class.getName());
+    }
+
     /**
      *  Lock used when maintaining queue of requested updates.
      */
     private static Object lock = new Object();
-    
+
     /**
      *  Flag if there is an update thread already running. We only launch a new
      *  thread if one isn't already running.
      */
     private static boolean threadRunning = false;
-    
+
     /**
      *  Internal queue of requested widget updates. You <b>must</b> access
      *  through {@link #requestUpdate(int[])} or {@link #getNextUpdate()} to make
      *  sure your access is correctly synchronized.
      */
     private static Queue<Integer> widgetIds = new LinkedList<Integer>();
-    
+
     /** Updater for the temperature values. */
     TemperatureUpdater updater;
-    
+
     /** Update period */
     Period period;
-    
+
     /**
      *  Request updates for the given widgets. Will only queue them up, you are
      *  still responsible for starting a processing thread if needed, usually by
@@ -70,7 +80,6 @@ public class UpdateService extends Service implements Constants, Runnable {
             }
         }
     }
-    
 
     /**
      *  Peek if we have more updates to perform. This method is special because
@@ -100,22 +109,22 @@ public class UpdateService extends Service implements Constants, Runnable {
             }
         }
     }
-    
+
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
 
-        SharedPreferences config = 
+        SharedPreferences config =
                 PreferenceManager.getDefaultSharedPreferences(this);
         period = PeriodFactory.createPeriod(
                 config.getString(REFRESH, PeriodFactory.ONE_HOUR_PERIOD));
-        
-        SharedPreferences preferences = 
-                getSharedPreferences(PREFERENCES, MODE_PRIVATE); 
+
+        SharedPreferences preferences =
+                getSharedPreferences(PREFERENCES, MODE_PRIVATE);
         PreferencesStorage storage = new PreferencesStorage(preferences);
         Bundle oldValues = storage.get();
         updater = new TemperatureUpdater(handler, preferences);
-        
+
         // if requested, trigger update of all widgets
         if (ACTION_UPDATE_ALL.equals(intent.getAction())) {
             AppWidgetManager manager = AppWidgetManager.getInstance(this);
@@ -133,7 +142,7 @@ public class UpdateService extends Service implements Constants, Runnable {
                 return;     // only start processing thread if not already running
             }
             if (!isExpired(oldValues)) {
-                stopSelf();     // temperature values are not expired 
+                stopSelf();     // temperature values are not expired
                 return;
             }
             if (!threadRunning) {
@@ -151,7 +160,7 @@ public class UpdateService extends Service implements Constants, Runnable {
         updater.run();
         stopSelf();
     }
-    
+
     /**
      *  Handles temperature updates.
      */
@@ -163,24 +172,21 @@ public class UpdateService extends Service implements Constants, Runnable {
             }
         }
     };
-    
+
     /**
      *  Sets alarm to next run.
      */
     void shedulerNextRun() {
         long nextUpdate = getNextStart();
-        
-        Intent updateIntent = new Intent(ACTION_UPDATE_ALL);
-        updateIntent.setClass(this, UpdateService.class);
 
-        PendingIntent pendingIntent = 
-                PendingIntent.getService(this, 0, updateIntent, 0);
+        PendingIntent pendingIntent =
+                PendingIntent.getService(this, 0, UPDATE_ALL_INTENT, 0);
 
         AlarmManager alarmManager = (AlarmManager)getSystemService(
                 Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC, nextUpdate, pendingIntent);  //RTC_WAKEUP ???
     }
-    
+
     /**
      *  Immediately updates widgets and notification bar.
      */
@@ -188,23 +194,23 @@ public class UpdateService extends Service implements Constants, Runnable {
         updateNotification(context, values);
         updateWidgets(context, values);
     }
-    
+
     /**
      *  Immediately updates notification in the status bar.
      */
     static void updateNotification(Context context, Bundle values) {
         TemperatureNotification.update(context, values);
     }
-    
+
     /**
      *  Immediately updates widgets with specified values.
      */
     static void updateWidgets(Context context, Bundle values) {
         Log.d(TAG, "updating widgets");
-        
-        AppWidgetManager manager = 
+
+        AppWidgetManager manager =
                 AppWidgetManager.getInstance(context);
-        RemoteViews updateViews = 
+        RemoteViews updateViews =
                 TemperatureWidget.buildUpdate(context, values);
 
         if (updateViews != null) {
@@ -223,7 +229,7 @@ public class UpdateService extends Service implements Constants, Runnable {
         long lastModified = values.getLong(LAST_MODIFIED);
         return period.isExpired(lastModified);
     }
-    
+
     /**
      *  Calculates next update time.
      */

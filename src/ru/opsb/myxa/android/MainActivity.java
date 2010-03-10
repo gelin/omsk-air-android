@@ -22,7 +22,7 @@ public class MainActivity extends Activity implements Constants {
 
     /** Storage for the previous temperature values */
     PreferencesStorage storage;
-    
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,12 +39,12 @@ public class MainActivity extends Activity implements Constants {
         super.onResume();
         startUpdate();
     }
-    
+
     @Override
     public void onDestroy() {
         super.onDestroy();
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -54,7 +54,7 @@ public class MainActivity extends Activity implements Constants {
         }
         return true;
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -69,7 +69,7 @@ public class MainActivity extends Activity implements Constants {
         }
         return false;
     }
-    
+
     /**
      *  Handles temperature updates.
      */
@@ -89,14 +89,14 @@ public class MainActivity extends Activity implements Constants {
             }
         }
     };
-    
+
     void startUpdate() {
         setProgressBarIndeterminateVisibility(true);
-        Thread updater = new Thread(new TemperatureUpdater(handler, 
+        Thread updater = new Thread(new TemperatureUpdater(handler,
                 getSharedPreferences(PREFERENCES ,MODE_PRIVATE)));
         updater.start();
     }
-    
+
     void updateTemperatureViews(Bundle values) {
         float temp = values.getFloat(TEMPERATURE, Float.NaN);
         TextView tempView = (TextView)findViewById(R.id.temp_value);
@@ -106,7 +106,7 @@ public class MainActivity extends Activity implements Constants {
         TextView dateView = (TextView)findViewById(R.id.temp_date);
         dateView.setText(formatDate(lastModified));
     }
-    
+
     String formatDate(long timestamp) {
         if (timestamp == 0) {
             return "";
@@ -115,7 +115,7 @@ public class MainActivity extends Activity implements Constants {
                 getResources().getString(R.string.date_format));
         return format.format(new Date(timestamp));
     }
-    
+
     String formatTemperature(float temperature) {
         if (Float.isNaN(temperature)) {
             return getResources().getString(R.string.no_temp);
@@ -124,17 +124,15 @@ public class MainActivity extends Activity implements Constants {
         }
         return getResources().getString(R.string.temp_format, temperature);
     }
-    
+
     void showError(String error) {
         String message = getResources().getString(R.string.update_error, error);
         Toast toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
         toast.show();
     }
-    
+
     void updateAll() {
-        Intent updateIntent = new Intent(UpdateService.ACTION_UPDATE_ALL);
-        updateIntent.setClass(this, UpdateService.class);
-        startService(updateIntent);
+        startService(UpdateService.UPDATE_ALL_INTENT);
     }
 
 }
