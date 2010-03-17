@@ -8,7 +8,7 @@ import android.content.BroadcastReceiver;
  *  Broadcast receiver which receives event about boot complete.
  *  Starts UpdateService.
  */
-public class BootCompleteReceiver extends BroadcastReceiver
+public class BootCompletedReceiver extends BroadcastReceiver
         implements Constants {
 
     public void onReceive (Context context, Intent intent) {
