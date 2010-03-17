@@ -31,12 +31,12 @@ public class MainActivity extends Activity implements Constants {
         setContentView(R.layout.main);
         storage = new PreferencesStorage(
                 getSharedPreferences(PREFERENCES ,MODE_PRIVATE));
-        updateTemperatureViews(storage.get());
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        updateTemperatureViews(storage.get());
         startUpdate();
     }
 
