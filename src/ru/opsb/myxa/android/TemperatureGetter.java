@@ -20,7 +20,7 @@ public class TemperatureGetter implements Runnable, Constants {
 
     /**	URL of the temperature source */
     static final String URL = "http://myxa.opsb.ru/files/weather.js";
-    
+
     /** Max content length */
     static final int MAX_CONTENT_LENGTH = 50 * 1024;    //50kbytes
 
@@ -31,7 +31,7 @@ public class TemperatureGetter implements Runnable, Constants {
 
     /** Handler where send a message with new values. */
     Handler handler;
-    
+
     /** Previous values (from the storage) */
     Bundle prevValues;
 
@@ -61,26 +61,26 @@ public class TemperatureGetter implements Runnable, Constants {
 
     /**
      *  Asks the temperature by the URL.
-     *  @throws IOException if the temperature cannot be retrieved  
+     *  @throws IOException if the temperature cannot be retrieved
      */
     Bundle getTemperatureBundle(Bundle prevValues) throws IOException {
         Bundle result = new Bundle();
-        
+
         URL url = new URL(URL);
         HttpURLConnection connection = (HttpURLConnection)url.openConnection();
         connection.setIfModifiedSince(prevValues.getLong(LAST_MODIFIED, 0));
         connection.connect();
-        
+
         result.putLong(LAST_MODIFIED, connection.getLastModified());
-        
+
         if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
             if (prevValues.containsKey(TEMPERATURE)) {
-                result.putFloat(TEMPERATURE, 
+                result.putFloat(TEMPERATURE,
                         prevValues.getFloat(TEMPERATURE, Float.NaN));
             }
             return result;
         }
-        
+
         int contentLength = connection.getContentLength();
         if (contentLength > MAX_CONTENT_LENGTH) {
             throw new IOException("too large content: " + contentLength + " bytes");
@@ -93,7 +93,7 @@ public class TemperatureGetter implements Runnable, Constants {
         } while (read < buf.length);
         String js = new String(buf, "ISO-8859-1");
         result.putFloat(TEMPERATURE, parseTemperature(js));
-        
+
         return result;
     }
 
@@ -102,7 +102,7 @@ public class TemperatureGetter implements Runnable, Constants {
      */
     float parseTemperature(String js) {
         //for test
-        //return 0.0f;
+        //return 1.0f;
         Matcher m = JS_PATTERN.matcher(js);
         if (!m.find()) {
             Log.w(TAG, "Failed to parse: " + js);
@@ -115,7 +115,7 @@ public class TemperatureGetter implements Runnable, Constants {
             return Float.NaN;
         }
     }
-    
+
     /**
      *  Sends result to the handler.
      */
@@ -124,7 +124,7 @@ public class TemperatureGetter implements Runnable, Constants {
         message.setData(result);
         handler.sendMessage(message);
     }
-    
+
     /**
      *  Sends error to the handler.
      */

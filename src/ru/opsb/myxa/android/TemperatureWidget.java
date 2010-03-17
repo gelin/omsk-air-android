@@ -15,7 +15,7 @@ import android.widget.RemoteViews;
  *  Widget which displays temperature.
  *  Widget update code copied from http://code.google.com/p/android-sky/
  */
-public class TemperatureWidget extends AppWidgetProvider 
+public class TemperatureWidget extends AppWidgetProvider
         implements Constants {
 
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -25,13 +25,13 @@ public class TemperatureWidget extends AppWidgetProvider
             appWidgetIds = appWidgetManager.getAppWidgetIds(
                     new ComponentName(context, TemperatureWidget.class));
         }
-        
+
         //update with old values
         PreferencesStorage storage = new PreferencesStorage(
                 context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE));
         RemoteViews views = buildUpdate(context, storage.get());
         appWidgetManager.updateAppWidget(appWidgetIds, views);
-        
+
         //request update for these widgets and launch updater service
         UpdateService.requestUpdate(appWidgetIds);
         context.startService(new Intent(context, UpdateService.class));
@@ -44,26 +44,26 @@ public class TemperatureWidget extends AppWidgetProvider
      */
     public static RemoteViews buildUpdate(Context context, Bundle values) {
         int layout = R.layout.widget;
-        
-        SharedPreferences prefs = 
+
+        SharedPreferences prefs =
             PreferenceManager.getDefaultSharedPreferences(context);
         if (HTC.equals(prefs.getString(STYLE, ""))) {
             layout = R.layout.htc_widget;
         }
-        
+
         RemoteViews views = new RemoteViews(
                 context.getPackageName(), layout);
         setUpOnClick(context, views);
         updateWidgetViews(context, views, values);
         return views;
     }
-    
+
     static void setUpOnClick(Context context, RemoteViews views) {
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
         views.setOnClickPendingIntent(R.id.widget, pendingIntent);
     }
-    
+
     static void updateWidgetViews(Context context, RemoteViews views, Bundle values) {
         float temp = values.getFloat(TEMPERATURE, Float.NaN);
         views.setTextViewText(R.id.temp_value, formatTemperature(context, temp));
@@ -71,16 +71,16 @@ public class TemperatureWidget extends AppWidgetProvider
         /*
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(values.getLong(LAST_MODIFIED));
-        views.setTextViewText(R.id.temp_value, 
+        views.setTextViewText(R.id.temp_value,
                 String.valueOf(calendar.get(Calendar.MINUTE)));
         */
         //views.setTextViewText(R.id.temp_value, formatTemperature(context, -0.5f));
     }
-    
+
     static String formatTemperature(Context context, float temperature) {
         if (Float.isNaN(temperature)) {
             return context.getResources().getString(R.string.no_temp);
-        } else if (Math.abs(temperature) <= 1) {
+        } else if (Math.abs(temperature) < 1) {
             return context.getResources().getString(R.string.widget_zero_temp);
         }
         return context.getResources().getString(

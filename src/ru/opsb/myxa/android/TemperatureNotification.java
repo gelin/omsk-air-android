@@ -14,19 +14,19 @@ import android.util.Log;
 /**
  *  Represents temperature notification.
  */
-public class TemperatureNotification extends Notification 
+public class TemperatureNotification extends Notification
         implements Constants {
 
     /** Notification ID */
     static final int ID = 1;
     /** Temperature image prefix */
     static final String RES_PREFIX="temp";
-    
+
     public static void update(Context context, Bundle values) {
         Log.d(TAG, "updating notification");
         NotificationManager manager = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
-        SharedPreferences prefs = 
+        SharedPreferences prefs =
             PreferenceManager.getDefaultSharedPreferences(context);
         if (!prefs.getBoolean(NOTIFICATION, false)) {
             manager.cancel(ID);
@@ -39,7 +39,7 @@ public class TemperatureNotification extends Notification
         }
         manager.notify(ID, new TemperatureNotification(context, values));
     }
-    
+
     TemperatureNotification(Context context, Bundle values) {
         float temp = values.getFloat(TEMPERATURE);
         long lastModified = values.getLong(LAST_MODIFIED);
@@ -50,10 +50,10 @@ public class TemperatureNotification extends Notification
         this.flags |= FLAG_NO_CLEAR;
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-        setLatestEventInfo(context, formatTitle(res, temp), 
+        setLatestEventInfo(context, formatTitle(res, temp),
                 formatText(res, temp), pendingIntent);
     }
-    
+
     static int getIconResource(Context context, Resources res, float temperature) {
         int temp = (int)temperature;
         if (temp < -50) {
@@ -63,19 +63,19 @@ public class TemperatureNotification extends Notification
             temp = 50;
         }
         StringBuilder resName = new StringBuilder();
-        
-        SharedPreferences prefs = 
+
+        SharedPreferences prefs =
             PreferenceManager.getDefaultSharedPreferences(context);
         if (HTC.equals(prefs.getString(STYLE, ""))) {
             resName.append("htc_");
         }
-        
+
         resName.append(RES_PREFIX);
-        
+
         if (temp < 0) {
             resName.append("_minus");
         } else if (temp > 0) {
-            
+
             resName.append("_plus");
         }
         resName.append("_").append(String.valueOf(Math.abs(temp)));
@@ -83,21 +83,21 @@ public class TemperatureNotification extends Notification
         return res.getIdentifier(resName.toString(),
                 "drawable", R.class.getPackage().getName());
     }
-    
+
     static String formatTicker(Resources res, float temperature) {
-        if (Math.abs(temperature) <= 1) {
+        if (Math.abs(temperature) < 1) {
             return res.getString(R.string.notification_ticker_zero);
         }
         return res.getString(R.string.notification_ticker, (int)temperature);
     }
-    
+
     String formatTitle(Resources res, float temperature) {
         if (Math.abs(temperature) <= 0.1f) {
             return res.getString(R.string.notification_title_zero);
         }
         return res.getString(R.string.notification_title, temperature);
     }
-    
+
     String formatText(Resources res, float temperature) {
         return res.getString(R.string.notification_text);
     }
