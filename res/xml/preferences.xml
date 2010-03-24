@@ -5,19 +5,19 @@
             android:defaultValue="false"
             android:title="@string/display_notification"
             android:summary="@string/display_notification_summary"/>
-            
-    <ListPreference android:key="refresh"
-            android:defaultValue="1h"
-            android:title="@string/refresh_interval"
-            android:summary="@string/refresh_interval_summary"
-            android:entries="@array/refresh_entries"
-            android:entryValues="@array/refresh_values"/>
-            
+
     <ListPreference android:key="style"
             android:defaultValue=""
             android:title="@string/style"
             android:summary="@string/style_summary"
             android:entries="@array/style_entries"
             android:entryValues="@array/style_values"/>
+
+    <ListPreference android:key="refresh"
+            android:defaultValue="1h"
+            android:title="@string/refresh_interval"
+            android:summary="@string/refresh_interval_summary"
+            android:entries="@array/refresh_entries"
+            android:entryValues="@array/refresh_values"/>
 
 </PreferenceScreen>
