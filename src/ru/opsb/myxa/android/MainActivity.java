@@ -81,6 +81,7 @@ public class MainActivity extends Activity implements Constants {
                 updateTemperatureViews(values);
                 setProgressBarIndeterminateVisibility(false);
                 updateAll();
+                updateGraphs();
                 break;
             case ERROR:
                 showError(String.valueOf(msg.obj));
@@ -133,6 +134,12 @@ public class MainActivity extends Activity implements Constants {
 
     void updateAll() {
         startService(UpdateService.UPDATE_ALL_INTENT);
+    }
+    
+    void updateGraphs() {
+        setProgressBarIndeterminateVisibility(true);
+        Thread updater = new Thread(new GraphsUpdater(this));
+        updater.start();
     }
 
 }
