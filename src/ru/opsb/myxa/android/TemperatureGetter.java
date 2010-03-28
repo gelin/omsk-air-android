@@ -21,9 +21,6 @@ public class TemperatureGetter implements Runnable, Constants {
     /**	URL of the temperature source */
     static final String URL = "http://myxa.opsb.ru/files/weather.js";
 
-    /** Max content length */
-    static final int MAX_CONTENT_LENGTH = 50 * 1024;    //50kbytes
-
     /** Regexp to parse JS */
     static final Pattern JS_PATTERN = Pattern.compile("Therm\\s*=\\s*['\"](-?\\d+(\\.\\d+)?)['\"]");
     /**	Group number with temperature result */
@@ -65,15 +62,16 @@ public class TemperatureGetter implements Runnable, Constants {
      */
     Bundle getTemperatureBundle(Bundle prevValues) throws IOException {
         Bundle result = new Bundle();
+        
+        HttpLoader loader = new HttpLoader(
+                URL, prevValues.getLong(LAST_MODIFIED, 0));
+        loader.load();
 
-        URL url = new URL(URL);
-        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-        connection.setIfModifiedSince(prevValues.getLong(LAST_MODIFIED, 0));
-        connection.connect();
+        result.putLong(LAST_MODIFIED, loader.getLastModified());
 
-        result.putLong(LAST_MODIFIED, connection.getLastModified());
-
-        if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
+        byte[] content = loader.getContent();
+        
+        if (!loader.isModified() || content == null) {
             if (prevValues.containsKey(TEMPERATURE)) {
                 result.putFloat(TEMPERATURE,
                         prevValues.getFloat(TEMPERATURE, Float.NaN));
@@ -81,17 +79,7 @@ public class TemperatureGetter implements Runnable, Constants {
             return result;
         }
 
-        int contentLength = connection.getContentLength();
-        if (contentLength > MAX_CONTENT_LENGTH) {
-            throw new IOException("too large content: " + contentLength + " bytes");
-        }
-        byte[] buf = new byte[contentLength];
-        int read = 0;
-        InputStream stream = connection.getInputStream();
-        do {
-            read += stream.read(buf);
-        } while (read < buf.length);
-        String js = new String(buf, "ISO-8859-1");
+        String js = new String(content, "ISO-8859-1");
         result.putFloat(TEMPERATURE, parseTemperature(js));
 
         return result;
