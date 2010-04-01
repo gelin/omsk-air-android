@@ -14,6 +14,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -28,6 +29,7 @@ public class GraphsUpdater implements Runnable, Constants {
         public long id = -1;    //-1 means not existed
         public String url;
         public String name;
+        public String mimeType = "image/png";
         public long lastModified;
         public GraphInfo(String url, String name) {
             this.url = url;
@@ -35,6 +37,7 @@ public class GraphsUpdater implements Runnable, Constants {
         }
         public GraphInfo copy() {
             GraphInfo result = new GraphInfo(this.url, this.name);
+            result.mimeType = this.mimeType;
             result.lastModified = this.lastModified;
             return result;
         }
@@ -59,7 +62,7 @@ public class GraphsUpdater implements Runnable, Constants {
     static final Uri IMAGES_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
     //TODO: this requires SD card existence, need to detect it
     /** ID of the images Bucket (Album) */
-    static final String BUCKET_ID = TAG;
+    static final String BUCKET_ID = String.valueOf(TAG.hashCode());
     /** Name of the Bucket */
     static final String BUCKET_NAME = "Omsk temperature graphs";    //how to localize?
     /** Projection to select last modified date for the images */
@@ -126,8 +129,10 @@ public class GraphsUpdater implements Runnable, Constants {
      *  @param  graphInfos   lastModified property of this objects is updated
      */
     void getLastModified() {
+        //Cursor cursor = contentResolver.query(IMAGES_URI,
+        //        LAST_MODIFIED_PROJECTION, LAST_MODIFIED_SELECTION, null, null);
         Cursor cursor = contentResolver.query(IMAGES_URI,
-                LAST_MODIFIED_PROJECTION, LAST_MODIFIED_SELECTION, null, null);
+                null, null, null, null);
         
         if (cursor != null && cursor.moveToFirst()) {
 
@@ -139,6 +144,9 @@ public class GraphsUpdater implements Runnable, Constants {
                     MediaStore.Images.ImageColumns.DATE_TAKEN);
         
             do {
+                Log.d(TAG, "image: " + 
+                        DatabaseUtils.dumpCurrentRowToString(cursor));
+                
                 String name = cursor.getString(nameColumn);
                 GraphInfo graphInfo = graphsMap.get(name);
                 if (graphInfo == null) {
@@ -162,22 +170,7 @@ public class GraphsUpdater implements Runnable, Constants {
             if (graphInfo.id >= 0) {
                 continue;
             }
-            
-            Log.d(TAG, "inserting " + graphInfo.name);
-            
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, 
-                    graphInfo.name);
-            values.put(MediaStore.Images.ImageColumns.DATE_TAKEN,
-                    graphInfo.lastModified);
-            values.put(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME, 
-                    BUCKET_NAME);
-            values.put(MediaStore.Images.ImageColumns.BUCKET_ID,
-                    BUCKET_ID);
-            
-            Uri uri = contentResolver.insert(IMAGES_URI, values);
-            Log.d(TAG, "inserted " + uri);
-            
+
             if (emptyGraph == null) {
                 InputStream in = context.getResources().openRawResource(R.drawable.empty_graph);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -194,13 +187,7 @@ public class GraphsUpdater implements Runnable, Constants {
                 emptyGraph = out.toByteArray();
             }
             
-            try { 
-                OutputStream out = contentResolver.openOutputStream(uri); 
-                out.write(emptyGraph); 
-                out.close(); 
-            } catch (Exception e) { 
-                Log.e(TAG, "exception while writing image", e); 
-            }
+            saveGraph(graphInfo, emptyGraph);
         }
     }
     
@@ -210,7 +197,30 @@ public class GraphsUpdater implements Runnable, Constants {
      *  @param  content     graph image got from HTTP server
      */
     void saveGraph(GraphInfo graphInfo, byte[] content) {
-        //TODO
+        Log.d(TAG, "inserting " + graphInfo.name);
+        
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, 
+                graphInfo.name);
+        values.put(MediaStore.Images.ImageColumns.MIME_TYPE, 
+                graphInfo.mimeType);
+        values.put(MediaStore.Images.ImageColumns.DATE_TAKEN,
+                graphInfo.lastModified);
+        values.put(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME, 
+                BUCKET_NAME);
+        //values.put(MediaStore.Images.ImageColumns.BUCKET_ID,
+        //        BUCKET_ID);
+        
+        Uri uri = contentResolver.insert(IMAGES_URI, values);
+        Log.d(TAG, "inserted " + uri);
+        
+        try { 
+            OutputStream out = contentResolver.openOutputStream(uri); 
+            out.write(content); 
+            out.close(); 
+        } catch (Exception e) { 
+            Log.e(TAG, "exception while writing image", e); 
+        }
     }
 
 }
