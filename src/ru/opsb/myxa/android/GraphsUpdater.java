@@ -19,6 +19,8 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -97,13 +99,17 @@ public class GraphsUpdater implements Runnable, Constants {
     Map<String, GraphInfo> graphsMap;
     /** Empty graph image */
     byte[] emptyGraph;
+    /** Handler to receive update results */
+    Handler handler;
     
     /**
      *  Creates graphs updater.
      *  @param context  application context
+     *  @param handler to receive update results
      */
-    public GraphsUpdater(Context context) {
+    public GraphsUpdater(Context context, Handler handler) {
         this.context = context;
+        this.handler = handler;
         contentResolver = context.getContentResolver();
         graphs = new ArrayList<GraphInfo>();
         graphsMap = new HashMap<String, GraphInfo>();
@@ -124,9 +130,12 @@ public class GraphsUpdater implements Runnable, Constants {
             try {
                 updateGraph(graph);
             } catch (IOException e) {
-                Log.w(TAG, e);
+                Log.w(TAG, "failed to update graph", e);
+                sendError(handler, e);
+                return;
             }
         }
+        sendSuccess(handler);
     }
     
     /**
@@ -232,7 +241,8 @@ public class GraphsUpdater implements Runnable, Constants {
             out.write(content); 
             out.close(); 
         } catch (Exception e) { 
-            Log.e(TAG, "exception while writing image", e); 
+            Log.e(TAG, "exception while writing image", e);
+            sendError(handler, e);
         }
         
         if (graphInfo.id >= 0) {
@@ -268,6 +278,23 @@ public class GraphsUpdater implements Runnable, Constants {
         Uri uri = contentResolver.insert(IMAGES_URI, values);
         graphInfo.id = ContentUris.parseId(uri);
         Log.d(TAG, "inserted " + uri);
+    }
+    
+    /**
+     *  Sends result to the handler.
+     */
+    static void sendSuccess(Handler handler) {
+        Message message = handler.obtainMessage(GRAPHS_UPDATE);
+        handler.sendMessage(message);
+    }
+
+    /**
+     *  Sends error to the handler.
+     */
+    static void sendError(Handler handler, Exception error) {
+        Message message = handler.obtainMessage(ERROR);
+        message.obj = error.getMessage();
+        handler.sendMessage(message);
     }
 
 }

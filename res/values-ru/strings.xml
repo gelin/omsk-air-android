@@ -2,11 +2,13 @@
 <resources>
     <string name="app_name">Температура в Омске</string>
     <string name="now_in_omsk">Сейчас в Омске</string>
+    <string name="omsk">Омск</string>
     <string name="date_format">EEE, d MMM yyyy HH:mm</string>
     <string name="update_error">Не удалось обновить температуру: %s</string>
+    <string name="update_graphs_error">Не удалось обновить графики: %s</string>
     <string name="refresh">Обновить</string>
     <string name="locate">Где Омск?</string>
-    <string name="omsk">Омск</string>
+    <string name="preferences">Настройки</string>
     <string name="display_notification">Уведомление</string>
     <string name="display_notification_summary">Показывать значение температуры в строке уведомлений</string>
     <string name="refresh_interval">Период обновления</string>
@@ -15,7 +17,6 @@
     <string name="refresh_30m">Каждые 30 минут</string>
     <string name="refresh_1h">Каждый час</string>
     <string name="refresh_3h">Каждые 3 часа</string>
-    <string name="preferences">Настройки</string>
     <string name="notification_ticker">В Омске %+d&#x00b0;</string>
     <string name="notification_title">Сейчас в Омске %+.1f&#x00b0;C</string>
     <string name="notification_ticker_zero">В Омске 0&#x00b0;</string>

@@ -18,8 +18,11 @@ public interface Constants {
     
     /** Message.what = temperature update */
     public static final int TEMPERATURE_UPDATE = 0;
+    /** Message.what = graphs update */
+    public static final int GRAPHS_UPDATE = 1;
     /** Message.what = error */
-    public static final int ERROR = 1;
+    public static final int ERROR = -1;
+    
     
     /** Intent to open Omsk on the map. */
     public Intent LOCATE_INTENT = new Intent(Intent.ACTION_VIEW, 

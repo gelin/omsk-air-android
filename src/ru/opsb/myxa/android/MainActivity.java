@@ -126,19 +126,41 @@ public class MainActivity extends Activity implements Constants {
         return getResources().getString(R.string.temp_format, temperature);
     }
 
-    void showError(String error) {
-        String message = getResources().getString(R.string.update_error, error);
+    void showError(int resString, String error) {
+        String message = getResources().getString(resString, error);
         Toast toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
         toast.show();
+    }
+    
+    void showError(String error) {
+        showError(R.string.update_error, error);
     }
 
     void updateAll() {
         startService(UpdateService.UPDATE_ALL_INTENT);
     }
     
+    /**
+     *  Handles graph updates.
+     */
+    final Handler graphHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case GRAPHS_UPDATE:
+                //update graph views
+                setProgressBarIndeterminateVisibility(false);
+                break;
+            case ERROR:
+                showError(R.string.update_graphs_error, String.valueOf(msg.obj));
+                setProgressBarIndeterminateVisibility(false);
+                break;
+            }
+        }
+    };
+    
     void updateGraphs() {
         setProgressBarIndeterminateVisibility(true);
-        Thread updater = new Thread(new GraphsUpdater(this));
+        Thread updater = new Thread(new GraphsUpdater(this, graphHandler));
         updater.start();
     }
 
