@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -81,6 +82,10 @@ public class GraphsUpdater implements Runnable, Constants {
     /** Selection to select last modified date for the images */
     static final String LAST_MODIFIED_SELECTION = 
         MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME + " = \"" + BUCKET_NAME + "\"";
+    /** Selection to update last modified date for the images */
+    static final String LAST_MODIFIED_UPDATE_SELECTION =
+        MediaStore.Images.ImageColumns._ID + " = ?";
+
     
     /** Context */
     Context context;
@@ -115,11 +120,18 @@ public class GraphsUpdater implements Runnable, Constants {
     public void run() {
         getLastModified();
         insertEmptyImages();
+        for (GraphInfo graph : graphs) {
+            try {
+                updateGraph(graph);
+            } catch (IOException e) {
+                Log.w(TAG, e);
+            }
+        }
     }
     
     /**
      *  Update one graph.
-     *  @throws IOException if some error iccured
+     *  @throws IOException if some error occurred
      */
     void updateGraph(GraphInfo graphInfo) throws IOException {
         HttpLoader loader = new HttpLoader(graphInfo.url, graphInfo.lastModified);
@@ -209,7 +221,7 @@ public class GraphsUpdater implements Runnable, Constants {
             Log.w(TAG, "SD card is not mounted");
             return;
         }
-        Log.d(TAG, "inserting " + graphInfo.name);
+        Log.d(TAG, "saving " + graphInfo.name);
         
         if (!BUCKET_DIR.isDirectory()) {
             BUCKET_DIR.mkdirs();
@@ -223,6 +235,22 @@ public class GraphsUpdater implements Runnable, Constants {
             Log.e(TAG, "exception while writing image", e); 
         }
         
+        if (graphInfo.id >= 0) {
+            updateDatabase(graphInfo);
+        } else {
+            insertDatabase(graphInfo);
+        }
+    }
+    
+    void updateDatabase(GraphInfo graphInfo) {
+        //update for MediaStore.Images means adding new and deleting old image
+        Uri uri = ContentUris.withAppendedId(IMAGES_URI, graphInfo.id);
+        int rowsDeleted = contentResolver.delete(uri, null, null);
+        Log.d(TAG, "deleted " + rowsDeleted + " rows with id = " + graphInfo.id);
+        insertDatabase(graphInfo);
+    }
+    
+    void insertDatabase(GraphInfo graphInfo) {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, 
                 graphInfo.name);
@@ -238,8 +266,8 @@ public class GraphsUpdater implements Runnable, Constants {
         //        BUCKET_ID);
         
         Uri uri = contentResolver.insert(IMAGES_URI, values);
+        graphInfo.id = ContentUris.parseId(uri);
         Log.d(TAG, "inserted " + uri);
-
     }
 
 }
