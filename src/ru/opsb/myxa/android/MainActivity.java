@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Gallery;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +32,17 @@ public class MainActivity extends Activity implements Constants {
         setContentView(R.layout.main);
         storage = new PreferencesStorage(
                 getSharedPreferences(PREFERENCES ,MODE_PRIVATE));
+        
+        /*
+        Cursor cursor = managedQuery(Graphs.IMAGES_URI,
+                null, GraphsUpdater.GRAPHS_SELECTION, null, null);
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+                android.R.layout.simple_gallery_item, cursor,
+                new String[] {MediaStore.Images.ImageColumns.DISPLAY_NAME},
+                new int[] { android.R.id.text1 });
+        */
+        Gallery gallery = (Gallery)findViewById(R.id.graphs);
+        gallery.setAdapter(new GraphImageAdapter(this));
     }
 
     @Override

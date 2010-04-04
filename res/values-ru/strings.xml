@@ -24,4 +24,8 @@
     <string name="notification_text">Температура воздуха в центре Омска</string>
     <string name="style">Стиль</string>
     <string name="style_summary">Стиль оформления уведомлений и виджета</string>
+    <string name="daily_graph">Температура за день</string>
+    <string name="weekly_graph">Температура за неделю</string>
+    <string name="monthly_graph">Температура за месяц</string>
+    <string name="annual_graph">Температура за год</string>
 </resources>

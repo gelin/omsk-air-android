@@ -1,7 +1,11 @@
 package ru.opsb.myxa.android;
 
+import static ru.opsb.myxa.android.Graphs.BUCKET_DIR;
+import static ru.opsb.myxa.android.Graphs.BUCKET_NAME;
+import static ru.opsb.myxa.android.Graphs.GRAPHS;
+import static ru.opsb.myxa.android.Graphs.IMAGES_URI;
+
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,12 +15,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ru.opsb.myxa.android.Graphs.GraphInfo;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -30,51 +34,6 @@ import android.util.Log;
  */
 public class GraphsUpdater implements Runnable, Constants {
 
-    /** URI of content provider for images */
-    static final Uri IMAGES_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-    //TODO: this requires SD card existence, need to detect it
-    /** Name of the Bucket */
-    static final String BUCKET_NAME = "omsk_temp";
-    /** Bucket directory */
-    static final File BUCKET_DIR = new File(
-            Environment.getExternalStorageDirectory(), BUCKET_NAME);
-    
-    static class GraphInfo {
-        public long id = -1;    //-1 means not existed
-        public String url;
-        public File path;
-        public String name;
-        public String mimeType = "image/png";
-        public long lastModified;
-        public GraphInfo(String url, String name) {
-            this.url = url;
-            this.name = name;
-            this.path = new File(BUCKET_DIR, name);
-        }
-        public GraphInfo copy() {
-            GraphInfo result = new GraphInfo(this.url, this.name);
-            result.path = this.path;
-            result.mimeType = this.mimeType;
-            result.lastModified = this.lastModified;
-            return result;
-        }
-    }
-    
-    /** Daily graph */
-    static final GraphInfo DAILY = new GraphInfo(
-            "http://myxa.opsb.ru/pics/daily.png", "daily.png");
-    /** Weekly graph */
-    static final GraphInfo WEEKLY = new GraphInfo(
-            "http://myxa.opsb.ru/pics/weekly.png", "weekly.png");
-    /** Monthly graph */
-    static final GraphInfo MONTHLY = new GraphInfo(
-            "http://myxa.opsb.ru/pics/monthly.png", "monthly.png");
-    /** Yearly graph */
-    static final GraphInfo YEARLY = new GraphInfo(
-            "http://myxa.opsb.ru/pics/annual.png", "annual.png");
-    /** All graphs */
-    static final GraphInfo[] GRAPHS = {DAILY, WEEKLY, MONTHLY, YEARLY};
-    
     /** Projection to select last modified date for the images */
     static final String[] LAST_MODIFIED_PROJECTION = {
         MediaStore.Images.ImageColumns._ID,
@@ -82,13 +41,9 @@ public class GraphsUpdater implements Runnable, Constants {
         MediaStore.Images.ImageColumns.DISPLAY_NAME,
     };
     /** Selection to select last modified date for the images */
-    static final String LAST_MODIFIED_SELECTION = 
+    static final String GRAPHS_SELECTION = 
         MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME + " = \"" + BUCKET_NAME + "\"";
-    /** Selection to update last modified date for the images */
-    static final String LAST_MODIFIED_UPDATE_SELECTION =
-        MediaStore.Images.ImageColumns._ID + " = ?";
 
-    
     /** Context */
     Context context;
     /** Content resolver */
@@ -158,7 +113,7 @@ public class GraphsUpdater implements Runnable, Constants {
      */
     void getLastModified() {
         Cursor cursor = contentResolver.query(IMAGES_URI,
-                LAST_MODIFIED_PROJECTION, LAST_MODIFIED_SELECTION, null, null);
+                LAST_MODIFIED_PROJECTION, GRAPHS_SELECTION, null, null);
         //Cursor cursor = contentResolver.query(IMAGES_URI,
         //        null, null, null, null);
         
@@ -236,6 +191,11 @@ public class GraphsUpdater implements Runnable, Constants {
             BUCKET_DIR.mkdirs();
         }
         
+        //update for MediaStore.Images means adding new and deleting old image
+        if (graphInfo.id >= 0) {
+            deleteDatabase(graphInfo);
+        }
+        
         try { 
             OutputStream out = new FileOutputStream(graphInfo.path); 
             out.write(content); 
@@ -245,19 +205,13 @@ public class GraphsUpdater implements Runnable, Constants {
             sendError(handler, e);
         }
         
-        if (graphInfo.id >= 0) {
-            updateDatabase(graphInfo);
-        } else {
-            insertDatabase(graphInfo);
-        }
+        insertDatabase(graphInfo);
     }
     
-    void updateDatabase(GraphInfo graphInfo) {
-        //update for MediaStore.Images means adding new and deleting old image
+    void deleteDatabase(GraphInfo graphInfo) {
         Uri uri = ContentUris.withAppendedId(IMAGES_URI, graphInfo.id);
         int rowsDeleted = contentResolver.delete(uri, null, null);
         Log.d(TAG, "deleted " + rowsDeleted + " rows with id = " + graphInfo.id);
-        insertDatabase(graphInfo);
     }
     
     void insertDatabase(GraphInfo graphInfo) {

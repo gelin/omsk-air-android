@@ -31,4 +31,8 @@
     <string name="style_summary">Visual style of the notification and widget</string>
     <string name="style_android">Android</string>
     <string name="style_htc">HTC</string>
+    <string name="daily_graph">Daily temperature</string>
+    <string name="weekly_graph">Weekly temperature</string>
+    <string name="monthly_graph">Monthly temperature</string>
+    <string name="annual_graph">Annual temperature</string>
 </resources>
