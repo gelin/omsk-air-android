@@ -1,11 +1,12 @@
 package ru.opsb.myxa.android;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -25,18 +27,30 @@ import android.util.Log;
  */
 public class GraphsUpdater implements Runnable, Constants {
 
+    /** URI of content provider for images */
+    static final Uri IMAGES_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+    //TODO: this requires SD card existence, need to detect it
+    /** Name of the Bucket */
+    static final String BUCKET_NAME = "omsk_temp";
+    /** Bucket directory */
+    static final File BUCKET_DIR = new File(
+            Environment.getExternalStorageDirectory(), BUCKET_NAME);
+    
     static class GraphInfo {
         public long id = -1;    //-1 means not existed
         public String url;
+        public File path;
         public String name;
         public String mimeType = "image/png";
         public long lastModified;
         public GraphInfo(String url, String name) {
             this.url = url;
             this.name = name;
+            this.path = new File(BUCKET_DIR, name);
         }
         public GraphInfo copy() {
             GraphInfo result = new GraphInfo(this.url, this.name);
+            result.path = this.path;
             result.mimeType = this.mimeType;
             result.lastModified = this.lastModified;
             return result;
@@ -58,13 +72,6 @@ public class GraphsUpdater implements Runnable, Constants {
     /** All graphs */
     static final GraphInfo[] GRAPHS = {DAILY, WEEKLY, MONTHLY, YEARLY};
     
-    /** URI of content provider for images */
-    static final Uri IMAGES_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-    //TODO: this requires SD card existence, need to detect it
-    /** ID of the images Bucket (Album) */
-    static final String BUCKET_ID = String.valueOf(TAG.hashCode());
-    /** Name of the Bucket */
-    static final String BUCKET_NAME = "Omsk temperature graphs";    //how to localize?
     /** Projection to select last modified date for the images */
     static final String[] LAST_MODIFIED_PROJECTION = {
         MediaStore.Images.ImageColumns._ID,
@@ -73,7 +80,7 @@ public class GraphsUpdater implements Runnable, Constants {
     };
     /** Selection to select last modified date for the images */
     static final String LAST_MODIFIED_SELECTION = 
-        MediaStore.Images.ImageColumns.BUCKET_ID + " = \"" + BUCKET_ID + "\"";
+        MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME + " = \"" + BUCKET_NAME + "\"";
     
     /** Context */
     Context context;
@@ -129,10 +136,10 @@ public class GraphsUpdater implements Runnable, Constants {
      *  @param  graphInfos   lastModified property of this objects is updated
      */
     void getLastModified() {
-        //Cursor cursor = contentResolver.query(IMAGES_URI,
-        //        LAST_MODIFIED_PROJECTION, LAST_MODIFIED_SELECTION, null, null);
         Cursor cursor = contentResolver.query(IMAGES_URI,
-                null, null, null, null);
+                LAST_MODIFIED_PROJECTION, LAST_MODIFIED_SELECTION, null, null);
+        //Cursor cursor = contentResolver.query(IMAGES_URI,
+        //        null, null, null, null);
         
         if (cursor != null && cursor.moveToFirst()) {
 
@@ -144,8 +151,8 @@ public class GraphsUpdater implements Runnable, Constants {
                     MediaStore.Images.ImageColumns.DATE_TAKEN);
         
             do {
-                Log.d(TAG, "image: " + 
-                        DatabaseUtils.dumpCurrentRowToString(cursor));
+                //Log.d(TAG, "image: " + 
+                //        DatabaseUtils.dumpCurrentRowToString(cursor));
                 
                 String name = cursor.getString(nameColumn);
                 GraphInfo graphInfo = graphsMap.get(name);
@@ -197,7 +204,24 @@ public class GraphsUpdater implements Runnable, Constants {
      *  @param  content     graph image got from HTTP server
      */
     void saveGraph(GraphInfo graphInfo, byte[] content) {
+        if (!Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            Log.w(TAG, "SD card is not mounted");
+            return;
+        }
         Log.d(TAG, "inserting " + graphInfo.name);
+        
+        if (!BUCKET_DIR.isDirectory()) {
+            BUCKET_DIR.mkdirs();
+        }
+        
+        try { 
+            OutputStream out = new FileOutputStream(graphInfo.path); 
+            out.write(content); 
+            out.close(); 
+        } catch (Exception e) { 
+            Log.e(TAG, "exception while writing image", e); 
+        }
         
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, 
@@ -206,6 +230,8 @@ public class GraphsUpdater implements Runnable, Constants {
                 graphInfo.mimeType);
         values.put(MediaStore.Images.ImageColumns.DATE_TAKEN,
                 graphInfo.lastModified);
+        values.put(MediaStore.Images.ImageColumns.DATA, 
+                graphInfo.path.toString());
         values.put(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME, 
                 BUCKET_NAME);
         //values.put(MediaStore.Images.ImageColumns.BUCKET_ID,
@@ -213,14 +239,7 @@ public class GraphsUpdater implements Runnable, Constants {
         
         Uri uri = contentResolver.insert(IMAGES_URI, values);
         Log.d(TAG, "inserted " + uri);
-        
-        try { 
-            OutputStream out = contentResolver.openOutputStream(uri); 
-            out.write(content); 
-            out.close(); 
-        } catch (Exception e) { 
-            Log.e(TAG, "exception while writing image", e); 
-        }
+
     }
 
 }
