@@ -1,18 +1,27 @@
 package ru.opsb.myxa.android;
 
+import static ru.opsb.myxa.android.Graphs.*;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import ru.opsb.myxa.android.Graphs.GraphInfo;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
-import android.widget.Gallery;
+import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +32,8 @@ public class MainActivity extends Activity implements Constants {
 
     /** Storage for the previous temperature values */
     PreferencesStorage storage;
+    /** Minimum graph width */
+    int minGraphWidth = 575;    //the width of images from myxa.opsb.ru
 
     /** Called when the activity is first created. */
     @Override
@@ -32,17 +43,11 @@ public class MainActivity extends Activity implements Constants {
         setContentView(R.layout.main);
         storage = new PreferencesStorage(
                 getSharedPreferences(PREFERENCES ,MODE_PRIVATE));
-        
-        /*
-        Cursor cursor = managedQuery(Graphs.IMAGES_URI,
-                null, GraphsUpdater.GRAPHS_SELECTION, null, null);
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_gallery_item, cursor,
-                new String[] {MediaStore.Images.ImageColumns.DISPLAY_NAME},
-                new int[] { android.R.id.text1 });
-        */
-        Gallery gallery = (Gallery)findViewById(R.id.graphs);
-        gallery.setAdapter(new GraphImageAdapter(this));
+
+        WindowManager windowManager = getWindowManager(); 
+        Display display = windowManager.getDefaultDisplay();
+        minGraphWidth = Math.max(display.getWidth(), display.getHeight());
+        updateAllGraphViews();
     }
 
     @Override
@@ -174,6 +179,29 @@ public class MainActivity extends Activity implements Constants {
         setProgressBarIndeterminateVisibility(true);
         Thread updater = new Thread(new GraphsUpdater(this, graphHandler));
         updater.start();
+    }
+
+    void updateAllGraphViews() {
+        for (GraphInfo graphInfo : GRAPHS) {
+            updateGraphView(graphInfo);
+        }
+    }
+    
+    void updateGraphView(GraphInfo graphInfo) {
+        ImageView image = (ImageView)findViewById(graphInfo.view);
+        Bitmap bitmap = getBitmap(graphInfo);
+        image.setImageBitmap(bitmap);
+        image.setMinimumWidth(minGraphWidth);
+        image.setMinimumHeight(0);
+    }
+    
+    Bitmap getBitmap(GraphInfo graphInfo) {
+        Bitmap bitmap = BitmapFactory.decodeFile(graphInfo.path.toString());
+        if (bitmap == null) {
+            bitmap = BitmapFactory.decodeResource(this.getResources(),
+                    R.drawable.empty_graph);
+        }
+        return bitmap;
     }
 
 }

@@ -23,16 +23,19 @@ public class Graphs {
         public File path;
         public String name;
         public int title;
+        public int view;
         public String mimeType = "image/png";
         public long lastModified;
-        public GraphInfo(String url, String name, int title) {
+        public GraphInfo(String url, String name, int title, int view) {
             this.url = url;
             this.name = name;
             this.title = title;
+            this.view = view;
             this.path = new File(BUCKET_DIR, name);
         }
         public GraphInfo copy() {
-            GraphInfo result = new GraphInfo(this.url, this.name, this.title);
+            GraphInfo result = new GraphInfo(
+                    this.url, this.name, this.title, this.view);
             result.path = this.path;
             result.mimeType = this.mimeType;
             result.lastModified = this.lastModified;
@@ -43,19 +46,19 @@ public class Graphs {
     /** Daily graph */
     static final GraphInfo DAILY = new GraphInfo(
             "http://myxa.opsb.ru/pics/daily.png", "daily.png", 
-            R.string.daily_graph);
+            R.string.daily_graph, R.id.daily_graph);
     /** Weekly graph */
     static final GraphInfo WEEKLY = new GraphInfo(
             "http://myxa.opsb.ru/pics/weekly.png", "weekly.png", 
-            R.string.weekly_graph);
+            R.string.weekly_graph, R.id.weekly_graph);
     /** Monthly graph */
     static final GraphInfo MONTHLY = new GraphInfo(
             "http://myxa.opsb.ru/pics/monthly.png", "monthly.png", 
-            R.string.monthly_graph);
+            R.string.monthly_graph, R.id.monthly_graph);
     /** Yearly graph */
     static final GraphInfo YEARLY = new GraphInfo(
             "http://myxa.opsb.ru/pics/annual.png", "annual.png",
-            R.string.annual_graph);
+            R.string.annual_graph, R.id.annual_graph);
     
     /** All graphs */
     static final GraphInfo[] GRAPHS = {DAILY, WEEKLY, MONTHLY, YEARLY};
