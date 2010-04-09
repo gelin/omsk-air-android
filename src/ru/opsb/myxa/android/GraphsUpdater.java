@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,10 @@ public class GraphsUpdater implements Runnable, Constants {
     /** Selection to select last modified date for the images */
     static final String GRAPHS_SELECTION = 
         MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME + " = \"" + BUCKET_NAME + "\"";
+    /** Selection to select all (possible multiple) graphs with the same name */
+    static final String GRAPH_SELECTION = 
+        MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME + " = \"" + BUCKET_NAME + "\"" +
+        " and " + MediaStore.Images.ImageColumns.DISPLAY_NAME + " = ?";
 
     /** Context */
     Context context;
@@ -81,16 +86,18 @@ public class GraphsUpdater implements Runnable, Constants {
     public void run() {
         getLastModified();
         insertEmptyImages();
-        for (GraphInfo graph : graphs) {
+        for (int i = 0; i < graphs.size(); i++) {
+            GraphInfo graph = graphs.get(i);
             try {
                 updateGraph(graph);
+                sendSuccess(handler, i);
             } catch (IOException e) {
                 Log.w(TAG, "failed to update graph", e);
                 sendError(handler, e);
                 return;
             }
         }
-        sendSuccess(handler);
+        sendComplete(handler);
     }
     
     /**
@@ -98,6 +105,11 @@ public class GraphsUpdater implements Runnable, Constants {
      *  @throws IOException if some error occurred
      */
     void updateGraph(GraphInfo graphInfo) throws IOException {
+        Date now = new Date();
+        if ((now.getTime() - graphInfo.lastModified) < graphInfo.expiration) {
+            //not expired
+            return;
+        }
         HttpLoader loader = new HttpLoader(graphInfo.url, graphInfo.lastModified);
         loader.load();
         graphInfo.lastModified = loader.getLastModified();
@@ -237,8 +249,17 @@ public class GraphsUpdater implements Runnable, Constants {
     /**
      *  Sends result to the handler.
      */
-    static void sendSuccess(Handler handler) {
+    static void sendSuccess(Handler handler, int graphIndex) {
         Message message = handler.obtainMessage(GRAPHS_UPDATE);
+        message.arg1 = graphIndex;
+        handler.sendMessage(message);
+    }
+    
+    /**
+     *  Sends result to the handler.
+     */
+    static void sendComplete(Handler handler) {
+        Message message = handler.obtainMessage(UPDATE_COMPLETE);
         handler.sendMessage(message);
     }
 

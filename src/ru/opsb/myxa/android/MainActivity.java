@@ -164,7 +164,9 @@ public class MainActivity extends Activity implements Constants {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case GRAPHS_UPDATE:
-                //update graph views
+                updateGraphView(GRAPHS[msg.arg1]);
+                break;
+            case UPDATE_COMPLETE:
                 setProgressBarIndeterminateVisibility(false);
                 break;
             case ERROR:

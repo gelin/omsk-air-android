@@ -20,6 +20,8 @@ public interface Constants {
     public static final int TEMPERATURE_UPDATE = 0;
     /** Message.what = graphs update */
     public static final int GRAPHS_UPDATE = 1;
+    /** Message.what = update complete */
+    public static final int UPDATE_COMPLETE = 2;
     /** Message.what = error */
     public static final int ERROR = -1;
     
