@@ -19,6 +19,9 @@
         <activity android:name=".Preferences"
                   android:label="@string/preferences">
         </activity>
+        
+        <activity android:name=".GraphActivity">
+        </activity>
 
         <receiver android:name=".TemperatureWidget">
             <intent-filter>

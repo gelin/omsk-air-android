@@ -2,6 +2,9 @@ package ru.opsb.myxa.android;
 
 import java.io.File;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -19,6 +22,7 @@ public class Graphs {
     
     static class GraphInfo {
         public long id = -1;    //-1 means not existed
+        public int index;
         public String url;
         public File path;
         public String name;
@@ -29,7 +33,9 @@ public class Graphs {
         /** "Weight" of the graph pixel - number of milliseconds
          *  represented by the graph pixel - graph expiration time */
         public long expiration;
-        public GraphInfo(String url, String name, int title, int view, long expiration) {
+        public GraphInfo(int index, String url, String name, 
+                int title, int view, long expiration) {
+            this.index = index;
             this.url = url;
             this.name = name;
             this.title = title;
@@ -39,7 +45,8 @@ public class Graphs {
         }
         public GraphInfo copy() {
             GraphInfo result = new GraphInfo(
-                    this.url, this.name, this.title, this.view, this.expiration);
+                    this.index, this.url, this.name, 
+                    this.title, this.view, this.expiration);
             result.path = this.path;
             result.mimeType = this.mimeType;
             result.lastModified = this.lastModified;
@@ -48,27 +55,36 @@ public class Graphs {
     }
     
     /** Daily graph */
-    static final GraphInfo DAILY = new GraphInfo(
+    static final GraphInfo DAILY = new GraphInfo(0,
             "http://myxa.opsb.ru/pics/daily.png", "daily.png", 
             R.string.daily_graph, R.id.daily_graph,
             24 * 60 * 60 * 1000 / 500);
     /** Weekly graph */
-    static final GraphInfo WEEKLY = new GraphInfo(
+    static final GraphInfo WEEKLY = new GraphInfo(1,
             "http://myxa.opsb.ru/pics/weekly.png", "weekly.png", 
             R.string.weekly_graph, R.id.weekly_graph,
             7 * 24 * 60 * 60 * 1000 / 500);
     /** Monthly graph */
-    static final GraphInfo MONTHLY = new GraphInfo(
+    static final GraphInfo MONTHLY = new GraphInfo(2,
             "http://myxa.opsb.ru/pics/monthly.png", "monthly.png", 
             R.string.monthly_graph, R.id.monthly_graph,
             30 * 60 * 60 * 1000 / 500);
     /** Yearly graph */
-    static final GraphInfo YEARLY = new GraphInfo(
+    static final GraphInfo YEARLY = new GraphInfo(3,
             "http://myxa.opsb.ru/pics/annual.png", "annual.png",
             R.string.annual_graph, R.id.annual_graph,
             365 * 24 * 60 * 60 * 1000 / 500);
     
     /** All graphs */
     static final GraphInfo[] GRAPHS = {DAILY, WEEKLY, MONTHLY, YEARLY};
+    
+    static Bitmap getBitmap(Context context, GraphInfo graphInfo) {
+        Bitmap bitmap = BitmapFactory.decodeFile(graphInfo.path.toString());
+        if (bitmap == null) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(),
+                    R.drawable.empty_graph);
+        }
+        return bitmap;
+    }
 
 }

@@ -19,8 +19,10 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -189,21 +191,20 @@ public class MainActivity extends Activity implements Constants {
         }
     }
     
-    void updateGraphView(GraphInfo graphInfo) {
+    void updateGraphView(final GraphInfo graphInfo) {
         ImageView image = (ImageView)findViewById(graphInfo.view);
-        Bitmap bitmap = getBitmap(graphInfo);
+        Bitmap bitmap = getBitmap(this, graphInfo);
         image.setImageBitmap(bitmap);
         image.setMinimumWidth(minGraphWidth);
         image.setMinimumHeight(0);
-    }
-    
-    Bitmap getBitmap(GraphInfo graphInfo) {
-        Bitmap bitmap = BitmapFactory.decodeFile(graphInfo.path.toString());
-        if (bitmap == null) {
-            bitmap = BitmapFactory.decodeResource(this.getResources(),
-                    R.drawable.empty_graph);
-        }
-        return bitmap;
+        
+        image.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, GraphActivity.class);
+                intent.putExtra(GraphActivity.EXTRA_GRAPH_INDEX, graphInfo.index);
+                startActivity(intent);
+            }
+        });
     }
 
 }
