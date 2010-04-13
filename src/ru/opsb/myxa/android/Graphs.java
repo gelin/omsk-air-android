@@ -5,15 +5,10 @@ import java.io.File;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Environment;
-import android.provider.MediaStore;
 
 public class Graphs {
 
-    /** URI of content provider for images */
-    static final Uri IMAGES_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-    //TODO: this requires SD card existence, need to detect it
     /** Name of the Bucket */
     static final String BUCKET_NAME = "omsk_temp";
     /** Bucket directory */
