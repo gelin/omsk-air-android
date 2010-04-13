@@ -35,4 +35,5 @@
     <string name="weekly_graph">Weekly temperature</string>
     <string name="monthly_graph">Monthly temperature</string>
     <string name="annual_graph">Annual temperature</string>
+    <string name="sd_warn">Please insert SD card to view temperature graphs</string>
 </resources>

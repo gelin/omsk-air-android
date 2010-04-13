@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.Display;
@@ -53,6 +54,7 @@ public class MainActivity extends Activity implements Constants {
     @Override
     public void onResume() {
         super.onResume();
+        checkSDCard();
         updateTemperatureViews(storage.get());
         startUpdate();
     }
@@ -203,6 +205,17 @@ public class MainActivity extends Activity implements Constants {
                 startActivity(intent);
             }
         });
+    }
+    
+    void checkSDCard() {
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            this.findViewById(R.id.graphs).setVisibility(View.VISIBLE);
+            this.findViewById(R.id.sd_warn).setVisibility(View.GONE);
+        } else {
+            this.findViewById(R.id.graphs).setVisibility(View.GONE);
+            this.findViewById(R.id.sd_warn).setVisibility(View.VISIBLE);
+        }
     }
 
 }

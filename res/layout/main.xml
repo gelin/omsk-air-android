@@ -35,6 +35,7 @@
         </FrameLayout>
     </LinearLayout>
     <ScrollView
+        android:id="@+id/graphs"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
         <LinearLayout
@@ -97,4 +98,15 @@
             </ImageView>
         </LinearLayout>
     </ScrollView>
+    <FrameLayout
+        android:id="@+id/sd_warn"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="gone">
+        <TextView
+            android:text="@string/sd_warn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"/>
+    </FrameLayout>
 </LinearLayout>
