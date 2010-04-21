@@ -3,13 +3,6 @@ package ru.opsb.myxa.android.graphs;
 import java.io.File;
 
 import ru.opsb.myxa.android.R;
-import ru.opsb.myxa.android.R.drawable;
-import ru.opsb.myxa.android.R.id;
-import ru.opsb.myxa.android.R.string;
-
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Environment;
 
 /**
@@ -46,18 +39,5 @@ public class Graphs {
     
     /** All graphs */
     public static final Graph[] GRAPHS = {DAILY, WEEKLY, MONTHLY, YEARLY};
-    
-    /**
-     *  Reads bitmap from the graph file.
-     *  If the file is missed or corrupted, returns empty_graph from resources.
-     */
-    public static Bitmap getBitmap(Context context, Graph graph) {
-        Bitmap bitmap = BitmapFactory.decodeFile(graph.getPath().toString());
-        if (bitmap == null) {
-            bitmap = BitmapFactory.decodeResource(context.getResources(),
-                    R.drawable.empty_graph);
-        }
-        return bitmap;
-    }
 
 }

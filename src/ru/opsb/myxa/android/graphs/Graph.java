@@ -5,6 +5,8 @@ package ru.opsb.myxa.android.graphs;
 
 import java.io.File;
 
+import android.graphics.Bitmap;
+
 /**
  *  Contains all information about one graph.
  */
@@ -34,6 +36,9 @@ public class Graph {
     /** "Weight" of the graph pixel - number of milliseconds
      *  represented by the graph pixel - graph expiration time */
     private long expiration;
+    
+    /** Bitmap content of the graph */
+    private Bitmap bitmap;
     
     /**
      *  Creates the graph with specified parameters 
@@ -123,6 +128,19 @@ public class Graph {
      */
     public void setLastModified(long lastModified) {
         this.lastModified = lastModified;
+    }
+    
+    /**
+     *  Returns bitmap of the graph. Can return null.
+     */
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+    /**
+     *  Sets bitmap of the graph.
+     */
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
     }
     
 }

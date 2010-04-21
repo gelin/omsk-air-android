@@ -1,22 +1,12 @@
 package ru.opsb.myxa.android.graphs;
 
-import static ru.opsb.myxa.android.graphs.Graphs.BUCKET_DIR;
-import static ru.opsb.myxa.android.graphs.Graphs.GRAPHS;
-
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import ru.opsb.myxa.android.Constants;
 import ru.opsb.myxa.android.HttpLoader;
 import android.content.Context;
-import android.os.Environment;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -30,9 +20,7 @@ public class GraphsUpdater implements Runnable, Constants {
     /** Context */
     Context context;
     /** Graphs information currently processed */
-    List<Graph> graphs;
-    /** Empty graph image */
-    byte[] emptyGraph;
+    GraphsStorage graphs = GraphsStorage.getInstance();
     /** Handler to receive update results */
     Handler handler;
     
@@ -44,11 +32,6 @@ public class GraphsUpdater implements Runnable, Constants {
     public GraphsUpdater(Context context, Handler handler) {
         this.context = context;
         this.handler = handler;
-        graphs = new ArrayList<Graph>();
-        for (int i = 0; i < GRAPHS.length; i++) {
-            Graph graph = GRAPHS[i].copy();
-            graphs.add(graph);
-        }
     }
     
     /**
@@ -73,59 +56,33 @@ public class GraphsUpdater implements Runnable, Constants {
      *  Update one graph.
      *  @throws IOException if some error occurred
      */
-    void updateGraph(Graph graphInfo) throws IOException {
-        getLastModified(graphInfo);
+    void updateGraph(Graph graph) throws IOException {
         Date now = new Date();
-        if ((now.getTime() - graphInfo.getLastModified()) < graphInfo.getExpiration()) {
+        if ((now.getTime() - graph.getLastModified()) < graph.getExpiration()) {
             //not expired
             return;
         }
-        HttpLoader loader = new HttpLoader(graphInfo.getUrl(), graphInfo.getLastModified());
+        HttpLoader loader = new HttpLoader(graph.getUrl(), graph.getLastModified());
         loader.load();
-        graphInfo.setLastModified(loader.getLastModified());
         byte[] content = loader.getContent();
         if (loader.isModified() && content != null) {
-            saveGraph(graphInfo, content);
-        }
-    }
-    
-    /**
-     *  Gets the previously saved last modified time for the graph.
-     */
-    void getLastModified(Graph graph) {
-        File file = graph.getPath();
-        if (!file.canRead()) {
-            return;
-        }
-        graph.setLastModified(file.lastModified());
-    }
-    
-    /**
-     *  Saves the graph to the content provider.
-     *  @param  graph   contains lastModified value
-     *  @param  content     graph image got from HTTP server
-     */
-    void saveGraph(Graph graph, byte[] content) {
-        if (!Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            Log.w(TAG, "SD card is not mounted");
-            return;
-        }
-        Log.d(TAG, "saving " + graph.getName());
-        
-        if (!BUCKET_DIR.isDirectory()) {
-            BUCKET_DIR.mkdirs();
-        }
-        
-        try {
-            File file = graph.getPath();
-            OutputStream out = new FileOutputStream(file); 
-            out.write(content); 
-            out.close();
-            file.setLastModified(graph.getLastModified());
-        } catch (Exception e) { 
-            Log.e(TAG, "exception while writing image", e);
-            sendError(handler, e);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(content, 0, content.length);
+            if (bitmap == null) {
+                Log.w(TAG, "invalid content received from " + graph.getUrl());
+                loader.load();
+                content = loader.getContent();
+                if (loader.isModified() && content != null) {
+                    bitmap = BitmapFactory.decodeByteArray(content, 0, content.length);
+                    if (bitmap == null) {
+                        Log.w(TAG, "invalid content received again from " + graph.getUrl());
+                    }
+                }
+            }
+            synchronized (graphs) {
+                graph.setLastModified(loader.getLastModified());
+                graph.setBitmap(bitmap);
+            }
+            GraphsStorage.saveGraph(graph, content);
         }
     }
     
