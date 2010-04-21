@@ -1,11 +1,12 @@
 package ru.opsb.myxa.android;
 
-import static ru.opsb.myxa.android.Graphs.*;
+import static ru.opsb.myxa.android.graphs.Graphs.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import ru.opsb.myxa.android.Graphs.GraphInfo;
+import ru.opsb.myxa.android.graphs.Graph;
+import ru.opsb.myxa.android.graphs.GraphsUpdater;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -186,14 +187,14 @@ public class MainActivity extends Activity implements Constants {
     }
 
     void updateAllGraphViews() {
-        for (GraphInfo graphInfo : GRAPHS) {
-            updateGraphView(graphInfo);
+        for (Graph graph : GRAPHS) {
+            updateGraphView(graph);
         }
     }
     
-    void updateGraphView(final GraphInfo graphInfo) {
-        ImageView image = (ImageView)findViewById(graphInfo.view);
-        Bitmap bitmap = getBitmap(this, graphInfo);
+    void updateGraphView(final Graph graph) {
+        ImageView image = (ImageView)findViewById(graph.getView());
+        Bitmap bitmap = getBitmap(this, graph);
         image.setImageBitmap(bitmap);
         image.setMinimumWidth(minGraphWidth);
         image.setMinimumHeight(0);
@@ -201,7 +202,7 @@ public class MainActivity extends Activity implements Constants {
         image.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, GraphActivity.class);
-                intent.putExtra(GraphActivity.EXTRA_GRAPH_INDEX, graphInfo.index);
+                intent.putExtra(GraphActivity.EXTRA_GRAPH_INDEX, graph.getIndex());
                 startActivity(intent);
             }
         });

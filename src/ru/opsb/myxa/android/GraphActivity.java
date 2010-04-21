@@ -1,8 +1,8 @@
 package ru.opsb.myxa.android;
 
-import static ru.opsb.myxa.android.Graphs.*;
+import static ru.opsb.myxa.android.graphs.Graphs.*;
 
-import ru.opsb.myxa.android.Graphs.GraphInfo;
+import ru.opsb.myxa.android.graphs.Graph;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -25,10 +25,10 @@ public class GraphActivity extends Activity implements Constants {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.graph);
         
-        GraphInfo graphInfo = GRAPHS[
+        Graph graph = GRAPHS[
                 getIntent().getIntExtra(EXTRA_GRAPH_INDEX, 0)];
-        setTitle(graphInfo.title);
-        updateGraphView(graphInfo);
+        setTitle(graph.getTitle());
+        updateGraphView(graph);
         /*
         HorizontalScrollView scroll = (HorizontalScrollView)
                 findViewById(R.id.graph_scroll);
@@ -36,9 +36,9 @@ public class GraphActivity extends Activity implements Constants {
         */
     }
     
-    void updateGraphView(final GraphInfo graphInfo) {
+    void updateGraphView(final Graph graph) {
         ImageView image = (ImageView)findViewById(R.id.graph_image);
-        Bitmap bitmap = getBitmap(this, graphInfo);
+        Bitmap bitmap = getBitmap(this, graph);
         image.setImageBitmap(bitmap);
         image.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
