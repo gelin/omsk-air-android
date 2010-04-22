@@ -65,24 +65,21 @@ public class GraphsUpdater implements Runnable, Constants {
         HttpLoader loader = new HttpLoader(graph.getUrl(), graph.getLastModified());
         loader.load();
         byte[] content = loader.getContent();
+        long lastModified = loader.getLastModified();
         if (loader.isModified() && content != null) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(content, 0, content.length);
-            if (bitmap == null) {
+            graph.save(content, lastModified);
+            if (graph.getBitmap() == null) {
                 Log.w(TAG, "invalid content received from " + graph.getUrl());
                 loader.load();
                 content = loader.getContent();
+                lastModified = loader.getLastModified();
                 if (loader.isModified() && content != null) {
-                    bitmap = BitmapFactory.decodeByteArray(content, 0, content.length);
-                    if (bitmap == null) {
+                    graph.save(content, lastModified);
+                    if (graph.getBitmap() == null) {
                         Log.w(TAG, "invalid content received again from " + graph.getUrl());
                     }
                 }
             }
-            synchronized (graphs) {
-                graph.setLastModified(loader.getLastModified());
-                graph.setBitmap(bitmap);
-            }
-            GraphsStorage.saveGraph(graph, content);
         }
     }
     

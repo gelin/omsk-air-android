@@ -26,6 +26,11 @@ import android.widget.Toast;
 
 /**
  *  Main activity of the application.
+ *  In onCreate() loads previously saved temperature values from shared preferences and
+ *  graphs from disk files and displays them.
+ *  In onResume() starts temperature values update. When message with new temperature
+ *  comes, displays it and starts graphs update. When new graphs downloaded,
+ *  displays them. When any update error occurs displays error message.
  */
 public class MainActivity extends Activity implements Constants {
 

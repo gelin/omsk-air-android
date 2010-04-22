@@ -3,9 +3,18 @@
  */
 package ru.opsb.myxa.android.graphs;
 
+import static ru.opsb.myxa.android.graphs.Graphs.BUCKET_DIR;
+import static ru.opsb.myxa.android.Constants.TAG;
+
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.util.Log;
 
 /**
  *  Contains all information about one graph.
@@ -82,13 +91,6 @@ public class Graph {
     }
     
     /**
-     *  Returns file where graph image is saved.
-     */
-    public File getPath() {
-        return path;
-    }
-    
-    /**
      *  Returns graph name.
      */
     public String getName() {
@@ -120,27 +122,68 @@ public class Graph {
     /**
      *  Returns the last modification timestamp.
      */
-    public long getLastModified() {
+    public synchronized long getLastModified() {
         return lastModified;
-    }
-    /**
-     *  Sets the last modification timestamp.
-     */
-    public void setLastModified(long lastModified) {
-        this.lastModified = lastModified;
     }
     
     /**
      *  Returns bitmap of the graph. Can return null.
      */
-    public Bitmap getBitmap() {
+    public synchronized Bitmap getBitmap() {
         return bitmap;
     }
+    
     /**
-     *  Sets bitmap of the graph.
+     *  Reads graph content from the disk.
+     *  Sets bitmap and lastModified properties of the graph.
+     *  If the file is absent, the bitmap of the graph is set to null.
      */
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
+    synchronized void load() {
+        File file = this.path;
+        if (!file.canRead()) {
+            this.lastModified = 0;
+            this.bitmap = null;
+            return;
+        }
+        this.lastModified = file.lastModified();
+        this.bitmap = BitmapFactory.decodeFile(file.toString());
+    }
+    
+    /**
+     *  Saves the graph to disk and updates bitmap property.
+     *  If the content of the graph is not a valid image,
+     *  the bitmap property is set to null, lastModified is set
+     *  to zero and the file on the disk is not updated.
+     *  If CD card is not mounted, no file is saved, but bitmap is updated.
+     *  @param  content content of the graph image downloaded from HTTP server
+     *  @param  lastModified    Last-Modified HTTP header value
+     *  @throws IOException if the graph cannot be saved
+     */
+    public synchronized void save(byte[] content, long lastModified) throws IOException {
+        this.bitmap = BitmapFactory.decodeByteArray(content, 0, content.length);
+        this.lastModified = lastModified;
+        
+        if (this.bitmap == null) {
+            this.lastModified = 0;
+            return;
+        }
+        if (!Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            Log.w(TAG, "SD card is not mounted");
+            return;
+        }
+        
+        Log.d(TAG, "saving " + this.name);
+        
+        if (!BUCKET_DIR.isDirectory()) {
+            BUCKET_DIR.mkdirs();
+        }
+        
+        File file = this.path;
+        OutputStream out = new FileOutputStream(file); 
+        out.write(content);
+        out.close();
+        file.setLastModified(this.lastModified);
     }
     
 }
