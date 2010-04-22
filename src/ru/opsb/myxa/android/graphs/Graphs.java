@@ -39,5 +39,11 @@ public class Graphs {
     
     /** All graphs */
     public static final Graph[] GRAPHS = {DAILY, WEEKLY, MONTHLY, YEARLY};
+    
+    /** Default width of graph image */
+    public static final int WIDTH = 575;
+    
+    /** Default height of graph image */
+    public static final int HEIGHT = 146;
 
 }

@@ -4,21 +4,25 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import ru.opsb.myxa.android.graphs.Graph;
+import ru.opsb.myxa.android.graphs.Graphs;
 import ru.opsb.myxa.android.graphs.GraphsStorage;
 import ru.opsb.myxa.android.graphs.GraphsUpdater;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -39,6 +43,9 @@ public class MainActivity extends Activity implements Constants {
     
     /** Graphs information currently processed */
     GraphsStorage graphs = GraphsStorage.getInstance();
+    
+    /** Current display width */
+    int displayWidth;
 
     /** Called when the activity is first created. */
     @Override
@@ -49,10 +56,7 @@ public class MainActivity extends Activity implements Constants {
         storage = new PreferencesStorage(
                 getSharedPreferences(PREFERENCES ,MODE_PRIVATE));
         graphs.init();
-        
-        //WindowManager windowManager = getWindowManager(); 
-        //Display display = windowManager.getDefaultDisplay();
-        //minGraphWidth = Math.max(display.getWidth(), display.getHeight());
+        getDisplayWidth();
         updateAllGraphViews();
     }
 
@@ -61,6 +65,7 @@ public class MainActivity extends Activity implements Constants {
         super.onResume();
         checkSDCard();
         updateTemperatureViews(storage.get());
+        getDisplayWidth();
         startUpdate();
     }
 
@@ -198,17 +203,28 @@ public class MainActivity extends Activity implements Constants {
     
     void updateGraphView(final Graph graph) {
         ImageView image = (ImageView)findViewById(graph.getView());
-        Bitmap bitmap = null;
-        synchronized (graphs) { 
-            bitmap = graph.getBitmap();
-        }
+        Bitmap bitmap = graph.getBitmap();
+        int bitmapWidth;
+        int bitmapHeight;
         if (bitmap == null) {
             image.setImageResource(R.drawable.empty_graph);
+            bitmapWidth = Graphs.WIDTH;
+            bitmapHeight = Graphs.HEIGHT;
         } else {
             image.setImageBitmap(bitmap);
+            bitmapWidth = bitmap.getWidth();
+            bitmapHeight = bitmap.getHeight();
         }
-        //image.setMinimumWidth(minGraphWidth);
-        //image.setMinimumHeight(0);
+        //scale the image by changing its height to fit the display width
+        if (bitmapWidth < displayWidth) {
+            //scale up
+            image.setAdjustViewBounds(false);
+            image.setMinimumHeight((int)((float)bitmapHeight * displayWidth / bitmapWidth));
+        } else {
+            //auto scale down
+            image.setAdjustViewBounds(true);
+        }
+        
         image.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, GraphActivity.class);
@@ -227,6 +243,12 @@ public class MainActivity extends Activity implements Constants {
             this.findViewById(R.id.graphs).setVisibility(View.GONE);
             this.findViewById(R.id.sd_warn).setVisibility(View.VISIBLE);
         }
+    }
+    
+    void getDisplayWidth() {
+        WindowManager windowManager = getWindowManager(); 
+        Display display = windowManager.getDefaultDisplay();
+        displayWidth = display.getWidth();
     }
 
 }
