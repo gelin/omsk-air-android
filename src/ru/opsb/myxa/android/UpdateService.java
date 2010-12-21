@@ -1,5 +1,6 @@
 package ru.opsb.myxa.android;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -135,7 +136,7 @@ public class UpdateService extends Service implements Constants, Runnable {
             requestUpdate(ids);     //update the same IDs later, when new temperature values come
         }
 
-        shedulerNextRun();
+        shedulerNextRun(oldValues);
 
         synchronized (lock) {
             if (threadRunning) {
@@ -176,15 +177,21 @@ public class UpdateService extends Service implements Constants, Runnable {
     /**
      *  Sets alarm to next run.
      */
-    void shedulerNextRun() {
-        long nextUpdate = getNextStart();
+    void shedulerNextRun(Bundle values) {
+        long nextUpdate = getNextStart(values);
 
         PendingIntent pendingIntent =
                 PendingIntent.getService(this, 0, UPDATE_ALL_INTENT, 0);
 
         AlarmManager alarmManager = (AlarmManager)getSystemService(
                 Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC, nextUpdate, pendingIntent);  //RTC_WAKEUP ???
+        if (nextUpdate > 0) {
+            Log.d(TAG, "scheduling update to " + new Date(nextUpdate));
+            alarmManager.set(AlarmManager.RTC, nextUpdate, pendingIntent);
+        } else {
+            Log.d(TAG, "cancelling update");
+            alarmManager.cancel(pendingIntent);
+        }
     }
 
     /**
@@ -233,8 +240,9 @@ public class UpdateService extends Service implements Constants, Runnable {
     /**
      *  Calculates next update time.
      */
-    long getNextStart() {
-        return period.getNextStart();
+    long getNextStart(Bundle values) {
+        long lastModified = values.getLong(LAST_MODIFIED);
+        return period.getNextStart(lastModified);
     }
 
     @Override

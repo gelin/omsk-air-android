@@ -18,6 +18,7 @@
     <string name="display_notification_summary">Display the temperature value in the notification bar</string>
     <string name="refresh_interval">Refresh interval</string>
     <string name="refresh_interval_summary">How often update the temperature value</string>
+    <string name="refresh_never">Never (manually)</string>
     <string name="refresh_15m">Every 15 minutes</string>
     <string name="refresh_30m">Every 30 minutes</string>
     <string name="refresh_1h">Every hour</string>

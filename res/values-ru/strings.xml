@@ -13,6 +13,7 @@
     <string name="display_notification_summary">Показывать значение температуры в строке уведомлений</string>
     <string name="refresh_interval">Период обновления</string>
     <string name="refresh_interval_summary">Как часто обновлять значение температуры</string>
+    <string name="refresh_never">Никогда (вручную)</string>
     <string name="refresh_15m">Каждые 15 минут</string>
     <string name="refresh_30m">Каждые 30 минут</string>
     <string name="refresh_1h">Каждый час</string>

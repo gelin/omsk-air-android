@@ -5,8 +5,6 @@ import java.util.Date;
 import ru.opsb.myxa.android.Constants;
 import ru.opsb.myxa.android.HttpLoader;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;

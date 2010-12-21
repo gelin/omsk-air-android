@@ -1,19 +1,11 @@
 package ru.opsb.myxa.android.graphs;
 
-import static ru.opsb.myxa.android.graphs.Graphs.BUCKET_DIR;
 import static ru.opsb.myxa.android.graphs.Graphs.GRAPHS;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import ru.opsb.myxa.android.Constants;
-import android.graphics.BitmapFactory;
-import android.os.Environment;
-import android.util.Log;
 
 /**
  *  Temporary storage to process graphs.

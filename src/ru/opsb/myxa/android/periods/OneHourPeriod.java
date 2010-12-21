@@ -4,7 +4,7 @@ import java.util.Calendar;
 
 public class OneHourPeriod extends AbstractPeriod {
 
-    public long getNextStart() {
+    public long getNextStart(long lastStart) {
         Calendar calendar = getNow();
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -13,12 +13,12 @@ public class OneHourPeriod extends AbstractPeriod {
         return calendar.getTimeInMillis();
     }
 
-    public boolean isExpired(long timestamp) {
+    public boolean isExpired(long lastStart) {
         Calendar calendar = getNow();
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MINUTE, 0);    //this hour with zero minutes
-        return timestamp < calendar.getTimeInMillis();   //strongly less!
+        return lastStart < calendar.getTimeInMillis();   //strongly less!
     }
 
 }

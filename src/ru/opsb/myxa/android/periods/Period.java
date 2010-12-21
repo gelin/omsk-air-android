@@ -9,12 +9,14 @@ public interface Period {
     
     /**
      *  Returns true if the specified timestamp is already expired.
+     *  @param  lastStart   previous period start
      */
-    public boolean isExpired(long timestamp);
+    public boolean isExpired(long lastStart);
     
     /**
      *  Returns next period start time since now.
+     *  @param  lastStart   previous period start
      */
-    public long getNextStart();
+    public long getNextStart(long lastStart);
 
 }

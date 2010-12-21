@@ -6,7 +6,7 @@ public class ThreeHoursPeriod extends AbstractPeriod {
 
     static final int PERIOD = 3;
     
-    public long getNextStart() {
+    public long getNextStart(long lastStart) {
         Calendar calendar = getNow();
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -17,14 +17,14 @@ public class ThreeHoursPeriod extends AbstractPeriod {
         return calendar.getTimeInMillis();
     }
 
-    public boolean isExpired(long timestamp) {
+    public boolean isExpired(long lastStart) {
         Calendar calendar = getNow();
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MINUTE, 0);
         int hours = calendar.get(Calendar.HOUR_OF_DAY);
         calendar.set(Calendar.HOUR_OF_DAY, hours - hours % PERIOD);
-        return timestamp < calendar.getTimeInMillis();   //strongly less!
+        return lastStart < calendar.getTimeInMillis();   //strongly less!
     }
 
 }

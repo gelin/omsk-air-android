@@ -6,7 +6,7 @@ public class ThirtyMinutesPeriod extends AbstractPeriod {
 
     static final int PERIOD = 30;
     
-    public long getNextStart() {
+    public long getNextStart(long lastStart) {
         Calendar calendar = getNow();
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -16,13 +16,13 @@ public class ThirtyMinutesPeriod extends AbstractPeriod {
         return calendar.getTimeInMillis();
     }
 
-    public boolean isExpired(long timestamp) {
+    public boolean isExpired(long lastStart) {
         Calendar calendar = getNow();
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.set(Calendar.SECOND, 0);
         int minutes = calendar.get(Calendar.MINUTE);
         calendar.set(Calendar.MINUTE, minutes - minutes % PERIOD);
-        return timestamp < calendar.getTimeInMillis();   //strongly less!
+        return lastStart < calendar.getTimeInMillis();   //strongly less!
     }
 
 }
