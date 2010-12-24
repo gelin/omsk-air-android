@@ -144,6 +144,12 @@ public class UpdateService extends Service implements Constants, Runnable {
             }
             if (!isExpired(oldValues)) {
                 stopSelf();     // temperature values are not expired
+                Log.d(TAG, "skipping update, not expired");
+                return;
+            }
+            if (!hasMoreUpdates() && !TemperatureNotification.isEnabled(this)) {
+                stopSelf();     //no widgets or notification to update.
+                Log.d(TAG, "skipping update, no widgets or notification");
                 return;
             }
             if (!threadRunning) {

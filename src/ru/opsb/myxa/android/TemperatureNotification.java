@@ -26,9 +26,7 @@ public class TemperatureNotification extends Notification
         Log.d(TAG, "updating notification");
         NotificationManager manager = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
-        SharedPreferences prefs =
-            PreferenceManager.getDefaultSharedPreferences(context);
-        if (!prefs.getBoolean(NOTIFICATION, false)) {
+        if (!isEnabled(context)) {
             manager.cancel(ID);
             return;
         }
@@ -38,6 +36,15 @@ public class TemperatureNotification extends Notification
             return;
         }
         manager.notify(ID, new TemperatureNotification(context, values));
+    }
+    
+    /**
+     *  Returns true if the notification is enabled.
+     */
+    public static boolean isEnabled(Context context) {
+        SharedPreferences prefs =
+            PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(NOTIFICATION, false);
     }
 
     TemperatureNotification(Context context, Bundle values) {
