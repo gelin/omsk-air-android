@@ -14,6 +14,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -152,6 +154,11 @@ public class UpdateService extends Service implements Constants, Runnable {
                 Log.d(TAG, "skipping update, no widgets or notification");
                 return;
             }
+            if (!isNetworkAvailable()) {
+                stopSelf();     //no network
+                Log.d(TAG, "skipping update, no network");
+                return;
+            }
             if (!threadRunning) {
                 threadRunning = true;
                 new Thread(this).start();
@@ -249,6 +256,20 @@ public class UpdateService extends Service implements Constants, Runnable {
     long getNextStart(Bundle values) {
         long lastModified = values.getLong(LAST_MODIFIED);
         return period.getNextStart(lastModified);
+    }
+    
+    /**
+     *  Check availability of network connections.
+     *  Returns true if any network connection is available.
+     */
+    boolean isNetworkAvailable() {
+        ConnectivityManager manager = 
+            (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo info = manager.getActiveNetworkInfo();
+        if (info == null) {
+            return false;
+        }
+        return info.isAvailable();
     }
 
     @Override
