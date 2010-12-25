@@ -18,12 +18,17 @@ public class SimplePeriod implements Period {
     
     
     public long getNextStart(long lastStart) {
-        return lastStart + length;
+        long now = System.currentTimeMillis();
+        long result = lastStart + length;
+        if (result <= now) { //next start is missed
+            result = now + length;
+        }
+        return result;
     }
 
     public boolean isExpired(long lastStart) {
         long now = System.currentTimeMillis();
-        return now > lastStart + length;
+        return now >= lastStart + length;
     }
 
 }
