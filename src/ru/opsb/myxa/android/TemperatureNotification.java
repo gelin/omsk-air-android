@@ -73,12 +73,6 @@ public class TemperatureNotification implements Constants {
         }
         StringBuilder resName = new StringBuilder();
 
-        SharedPreferences prefs =
-            PreferenceManager.getDefaultSharedPreferences(context);
-        if (HTC.equals(prefs.getString(STYLE, ""))) {
-            resName.append("htc_");
-        }
-
         resName.append(RES_PREFIX);
 
         if (temp < 0) {
