@@ -14,8 +14,7 @@ import android.util.Log;
 /**
  *  Represents temperature notification.
  */
-public class TemperatureNotification extends Notification
-        implements Constants {
+public class TemperatureNotification implements Constants {
 
     /** Notification ID */
     static final int ID = 1;
@@ -35,9 +34,9 @@ public class TemperatureNotification extends Notification
             manager.cancel(ID);
             return;
         }
-        manager.notify(ID, new TemperatureNotification(context, values));
+        manager.notify(ID, build(context, values));
     }
-    
+
     /**
      *  Returns true if the notification is enabled.
      */
@@ -47,18 +46,21 @@ public class TemperatureNotification extends Notification
         return prefs.getBoolean(NOTIFICATION, false);
     }
 
-    TemperatureNotification(Context context, Bundle values) {
+    static Notification build(Context context, Bundle values) {
+        Notification.Builder builder = new Notification.Builder(context);
         float temp = values.getFloat(TEMPERATURE);
         long lastModified = values.getLong(LAST_MODIFIED);
         Resources res = context.getResources();
-        this.icon = getIconResource(context, res, temp);
-        this.tickerText = formatTicker(res, temp);
-        this.when = lastModified;
-        this.flags |= FLAG_NO_CLEAR;
+        builder.setSmallIcon(getIconResource(context, res, temp));
+        builder.setTicker(formatTicker(res, temp));
+        builder.setWhen(lastModified);
+        builder.setOngoing(true);
+        builder.setContentTitle(formatTitle(res, temp));
+        builder.setContentText(formatText(res, temp));
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-        setLatestEventInfo(context, formatTitle(res, temp),
-                formatText(res, temp), pendingIntent);
+        builder.setContentIntent(pendingIntent);
+        return builder.getNotification();
     }
 
     static int getIconResource(Context context, Resources res, float temperature) {
@@ -98,14 +100,14 @@ public class TemperatureNotification extends Notification
         return res.getString(R.string.notification_ticker, (int)temperature);
     }
 
-    String formatTitle(Resources res, float temperature) {
+    static String formatTitle(Resources res, float temperature) {
         if (Math.abs(temperature) <= 0.1f) {
             return res.getString(R.string.notification_title_zero);
         }
         return res.getString(R.string.notification_title, temperature);
     }
 
-    String formatText(Resources res, float temperature) {
+    static String formatText(Resources res, float temperature) {
         return res.getString(R.string.notification_text);
     }
 
