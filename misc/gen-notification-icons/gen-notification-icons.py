@@ -59,8 +59,9 @@ def save_icon(resolution, index, image):
 
 
 if __name__ == '__main__':
-    parts = load_parts('hdpi')
-    for i in range(-50, 51):
-        icon = build_icon(select_icon_parts(i, parts))
-        file_name = save_icon('hdpi', i, icon)
-        print(file_name)
+    for res in ('ldpi', 'mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'):
+        parts = load_parts(res)
+        for idx in range(-50, 51):
+            icon = build_icon(select_icon_parts(idx, parts))
+            file_name = save_icon(res, idx, icon)
+            print(file_name)
