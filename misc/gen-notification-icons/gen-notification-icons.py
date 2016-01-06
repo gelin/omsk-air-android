@@ -40,8 +40,8 @@ def select_icon_parts(index, parts):
     result = []
     if index < 0:
         result.append(parts['minus'])
-    if index > 0:
-        result.append(parts['plus'])
+    # if index > 0:
+    #     result.append(parts['plus'])
     if abs(index) >= 10:
         result.append(parts[str(abs(index) // 10)])
     result.append(parts[str(abs(index) % 10)])
